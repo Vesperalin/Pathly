@@ -1,5 +1,6 @@
 import { includeIgnoreFile } from "@eslint/compat";
 import eslint from "@eslint/js";
+import importPlugin from "eslint-plugin-import";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import prettier from "eslint-plugin-prettier/recommended";
 import react from "eslint-plugin-react";
@@ -24,12 +25,15 @@ export default tseslint.config(
   // Plugins and rules
   {
     plugins: {
+      import: importPlugin,
       react,
       "react-hooks": reactHooks,
       "jsx-a11y": jsxA11y,
       "react-compiler": reactCompiler,
     },
     rules: {
+      ...importPlugin.flatConfigs.recommended.rules,
+      ...importPlugin.flatConfigs.typescript.rules,
       ...react.configs.flat.recommended.rules,
       ...reactHooks.configs.recommended.rules,
       ...jsxA11y.flatConfigs.recommended.rules,
@@ -45,7 +49,14 @@ export default tseslint.config(
         document: true,
       },
     },
-    settings: { react: { version: "detect" } },
+    settings: {
+      react: { version: "detect" },
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+        },
+      },
+    },
   },
 
   // Prettier last
