@@ -10,6 +10,8 @@
     "lint:fix": "eslint --fix",
     "typecheck": "tsc --noEmit",
     "format": "prettier --check .",
+    "check:all": "eslint . && prettier --check .",
+    "fix:all": "eslint . --fix && prettier --write .",
     "format:fix": "prettier --write .",
     "clean": "rm -rf .next",
     "prepare": "husky"
