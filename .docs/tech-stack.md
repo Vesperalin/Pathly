@@ -1,23 +1,23 @@
-# Tech Stack Aplikacji
+# Application Tech Stack
 
-Ten dokument opisuje kluczowe technologie używane w projekcie Pathly, aby zapewnić spójne zrozumienie architektury.
+This document describes the key technologies used in the Pathly project to ensure a consistent understanding of the architecture.
 
 ## Frontend
 
-- **Next.js 15**: Framework React do budowy aplikacji full-stack. Zarządza routingiem, renderowaniem po stronie serwera (SSR) i klienta (CSR).
-- **React 19**: Biblioteka do budowy interfejsów użytkownika (UI) w oparciu o architekturę komponentową.
-- **TypeScript 5**: Superset JavaScriptu dodający statyczne typowanie dla większego bezpieczeństwa i lepszej jakości kodu.
-- **Tailwind CSS 4**: Framework CSS typu utility-first do szybkiego stylowania interfejsu bezpośrednio w plikach komponentów.
-- **Shadcn/ui**: Biblioteka gotowych komponentów UI zintegrowana z Tailwind CSS, wspierająca motywy (jasny/ciemny) i wysoką dostępność (a11y).
+- **Next.js 15**: A React framework for building full-stack applications. It manages routing, server-side rendering (SSR), and client-side rendering (CSR).
+- **React 19**: A library for building user interfaces (UI) based on a component architecture.
+- **TypeScript 5**: A superset of JavaScript that adds static typing for greater security and better code quality.
+- **Tailwind CSS 4**: A utility-first CSS framework for quickly styling the interface directly in component files.
+- **Shadcn/ui**: A library of pre-built UI components integrated with Tailwind CSS, supporting themes (light/dark) and high accessibility (a11y).
 
 ## Backend (BaaS)
 
-- **Supabase**: Platforma Backend-as-a-Service (BaaS) typu open-source, która dostarcza kluczowe usługi backendowe.
-- **Baza Danych PostgreSQL**: Główna baza danych do przechowywania danych, z wykorzystaniem Row Level Security (RLS) w celu zapewnienia, że użytkownicy mają dostęp tylko do własnych zasobów.
-- **Authentication**: Wbudowany system do zarządzania użytkownikami (rejestracja, logowanie) oparty na emailu i haśle.
-- **Auto-generowane API**: Automatycznie dostarcza API do interakcji z bazą danych, co znacznie przyspiesza rozwój operacji CRUD.
+- **Supabase**: An open-source Backend-as-a-Service (BaaS) platform that provides key backend services.
+- **PostgreSQL Database**: The main database for data storage, using Row Level Security (RLS) to ensure that users only have access to their own resources.
+- **Authentication**: A built-in system for user management (registration, login) based on email and password.
+- **Auto-generated API**: Automatically provides an API for interacting with the database, which significantly speeds up the development of CRUD operations.
 
-## CI/CD i Hosting
+## CI/CD and Hosting
 
-- **GitHub Actions**: Narzędzie do ciągłej integracji (CI). Używane do automatycznego uruchamiania zadań (testy, linting, sprawdzanie typów) przy każdym pull requeście, aby zapewnić jakość kodu.
-- **Vercel**: Platforma do hostingu i ciągłego wdrażania (CD), zoptymalizowana dla Next.js. Zapewnia automatyczne wdrożenia produkcyjne oraz środowiska podglądowe (preview) dla każdego pull requesta.
+- **GitHub Actions**: A tool for continuous integration (CI). Used to automatically run tasks (tests, linting, type checking) with every pull request to ensure code quality.
+- **Vercel**: A platform for hosting and continuous deployment (CD), optimized for Next.js. It provides automatic production deployments and preview environments for each pull request.
