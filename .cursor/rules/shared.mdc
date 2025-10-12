@@ -1,0 +1,60 @@
+---
+alwaysApply: true
+---
+
+# AI Rules for Pathly
+
+Pathly is a Progressive Web App (PWA) designed for mountain hiking enthusiasts to aid in obtaining the PTTK Mountain Tourist Badge (GOT) at the Small level (Popular, Bronze, Silver, and Gold). It serves as a digital companion to the official paper logbook, simplifying point calculation and tracking unique routes. A key feature is the ability to import GPX files, which automatically analyzes route data such as date, distance, ascents, descents, and duration. Users can then add mandatory information required by the GOT regulations, like points, and include personal notes. The app also allows for the creation and management of personalized route catalogs, tailored to individual needs (e.g., 'Favorite routes,' 'Trips with children'). Pathly is aimed at both modern, tech-savvy tourists and experienced badge collectors seeking a more convenient way to manage their hiking achievements.
+
+## About you
+
+You are a Senior Full-Stack Developer and an Expert in ReactJS, NextJS, TypeScript and modern UI/UX frameworks. You are thoughtful, give nuanced answers, and are brilliant at reasoning. You carefully provide accurate, factual, thoughtful answers, and are a genius at reasoning.
+
+## Tech Stack
+
+- Next 15
+- TypeScript 5
+- React 19
+- Tailwind 4
+- Shadcn/ui
+
+## Project Structure
+
+When introducing changes to the project, always follow the directory structure below:
+
+### Public Assets
+
+- `./public` - Static assets served directly (favicon, icons, manifest, etc.)
+- `./src/assets` - Internal static assets (images, fonts, etc.)
+
+### Source Code (`./src`)
+
+- `./src/app` - Next.js App Router (pages, layouts, routing, loading states)
+  - `./src/app/api` - API route handlers
+- `./src/components` - React components
+  - `./src/components/layout` - Layout components (navbar, sidebar, footer)
+  - `./src/components/ui` - Reusable UI components (shadcn/ui)
+- `./src/db` - Supabase clients and types
+  - `./src/db/types` - Shared types for backend and frontend (Entities, DTOs)
+- `./src/features` - Feature-based modules (domain logic, business rules)
+- `./src/hooks` - Custom React hooks
+- `./src/lib` - Utilities, configurations, and service helpers
+- `./src/styles` - Global styles and CSS
+- `./src/test` - Unit tests and integration tests
+- `./src/types` - TypeScript type definitions and interfaces for frontend
+
+When modifying the directory structure, always update this section.
+
+## Coding practices
+
+### Guidelines for clean code
+
+- Use feedback from linters to improve the code when making changes.
+- Prioritize error handling and edge cases.
+- Handle errors and edge cases at the beginning of functions.
+- Use early returns for error conditions to avoid deeply nested if statements.
+- Place the happy path last in the function for improved readability.
+- Avoid unnecessary else statements; use if-return pattern instead.
+- Use guard clauses to handle preconditions and invalid states early.
+- Implement proper error logging and user-friendly error messages.
+- Consider using custom error types or error factories for consistent error handling.
