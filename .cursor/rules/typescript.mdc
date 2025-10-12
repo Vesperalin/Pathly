@@ -1,0 +1,13 @@
+---
+globs: src/types
+alwaysApply: false
+---
+
+## TypeScript typing
+
+### Naming conventions:
+
+- Use PascalCase for all type and interface names.
+- All hand-written enums must end with `Enum` (e.g. `UserRoleEnum`).
+- All React component prop types must end with `Props` (e.g. `ButtonProps`).
+- All function parameter types must end with `Params` (e.g. `CreateUserParams`).
