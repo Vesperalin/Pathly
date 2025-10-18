@@ -27,6 +27,7 @@
 - Współdzielenie katalogów
 - Współdzielenie tras
 - Zaznaczanie na mapie przebytej trasy
+- Edycja plików GPX przypisanych do trasy
 - Bogata obsługa i analiza multimediów (np. zdjęć z trasy)
 - Eksport informacji do PDF
 - Katalogi do odznak GOT PTTK Dużych

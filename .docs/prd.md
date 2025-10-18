@@ -88,6 +88,7 @@ Następujące funkcjonalności nie wchodzą w zakres wersji MVP (Minimum Viable 
 - `Tryb offline:` Możliwość korzystania z aplikacji bez aktywnego połączenia z internetem.
 - `Analityka:` Integracja z zewnętrznymi narzędziami analitycznymi do śledzenia zachowań użytkowników.
 - `Obsługa duplikatów:` Mechanizmy wykrywania i obsługi potencjalnych duplikatów tras.
+- `Trasy:` Edycja plików GPX w trasach.
 
 ## 5. Historyjki użytkowników
 
