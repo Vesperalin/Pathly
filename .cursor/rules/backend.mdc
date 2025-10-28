@@ -1,0 +1,14 @@
+---
+globs: src/db/*.ts,src/middleware.ts,src/lib/*.ts
+alwaysApply: false
+---
+
+### Backend and Database
+
+- Use Supabase for backend services, including authentication and database interactions.
+- Follow Supabase guidelines for security and performance.
+- Use Zod schemas to validate data exchanged with the backend.
+- **Supabase Client Usage in Next.js:**
+  - For **Client Components**: `import { createClient } from '@/lib/supabase/client'`
+  - For **Server Components, Route Handlers, and Server Actions**: `import { createClient } from '@/lib/supabase/server'`
+- The `createClient` functions provide a fully typed client instance. For explicit type annotations, use `SupabaseClient<Database>` from `@supabase/supabase-js` and `@/db/database.types.ts`.

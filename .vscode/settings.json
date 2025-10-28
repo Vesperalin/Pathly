@@ -10,5 +10,5 @@
   "eslint.run": "onSave",
   "eslint.format.enable": false,
   "eslint.codeActionsOnSave.mode": "all",
-  "cSpell.words": ["predefiniowanych", "predefinipowanych", "Szlakownik", "turbopack"]
+  "cSpell.words": ["fkey", "pathly", "predefiniowanych", "SUPABASE", "Szlakownik", "timestamptz", "turbopack"]
 }
