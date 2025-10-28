@@ -1,6 +1,23 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
+  graphql_public: {
+    Tables: Record<never, never>;
+    Views: Record<never, never>;
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: Record<never, never>;
+    CompositeTypes: Record<never, never>;
+  };
   pathly: {
     Tables: {
       analytics_events: {
@@ -203,12 +220,66 @@ export interface Database {
       };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      create_route_with_associations: {
+        Args: {
+          p_catalog_ids?: string[];
+          p_distance: number;
+          p_duration: number;
+          p_got_points?: number;
+          p_mountain_group_ids?: string[];
+          p_name: string;
+          p_notes?: string;
+          p_route_date: string;
+          p_total_ascent: number;
+          p_total_descent: number;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
+      get_catalog_details: {
+        Args: {
+          p_catalog_id: string;
+          p_routes_order?: string;
+          p_routes_page?: number;
+          p_routes_page_size?: number;
+          p_routes_sort_by?: string;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
+      get_user_catalogs: {
+        Args: {
+          p_order?: string;
+          p_page?: number;
+          p_page_size?: number;
+          p_sort_by?: string;
+          p_type?: string;
+          p_user_id: string;
+        };
+        Returns: {
+          created_at: string;
+          id: string;
+          is_predefined: boolean;
+          name: string;
+          total_count: number;
+          total_points: number;
+          updated_at: string;
+        }[];
+      };
+    };
     Enums: {
       analytics_event_type_enum: "account_created" | "route_added" | "catalog_created" | "route_assigned_to_catalog";
       language_enum: "pl" | "en";
       theme_enum: "light" | "dark" | "system";
     };
+    CompositeTypes: Record<never, never>;
+  };
+  public: {
+    Tables: Record<never, never>;
+    Views: Record<never, never>;
+    Functions: Record<never, never>;
+    Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
   };
 }
@@ -323,11 +394,17 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   pathly: {
     Enums: {
       analytics_event_type_enum: ["account_created", "route_added", "catalog_created", "route_assigned_to_catalog"],
       language_enum: ["pl", "en"],
       theme_enum: ["light", "dark", "system"],
     },
+  },
+  public: {
+    Enums: {},
   },
 } as const;
