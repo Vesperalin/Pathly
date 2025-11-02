@@ -11,13 +11,15 @@ export type Language = Database["pathly"]["Enums"]["language_enum"];
 export type Theme = Database["pathly"]["Enums"]["theme_enum"];
 
 // Generic API Types
+export interface PaginationParams {
+  page: number;
+  page_size: number;
+  total: number;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
-  pagination: {
-    page: number;
-    page_size: number;
-    total: number;
-  };
+  pagination: PaginationParams;
 }
 
 // Profile DTOs and Commands

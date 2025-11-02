@@ -1,25 +1,14 @@
-import { getCatalogDetails } from "@/features/catalogs/catalog.service";
-import { GetCatalogDetailsQuerySchema } from "@/features/catalogs/validation";
+import { deleteCatalog, getCatalogDetails, updateCatalog } from "@/features/catalogs/catalog.service";
+import {
+  CatalogIdParamSchema,
+  GetCatalogDetailsQuerySchema,
+  UpdateCatalogCommandSchema,
+} from "@/features/catalogs/validation";
+import { handleApiError } from "@/lib/apiErrors";
+import { NotFoundError, ValidationError } from "@/lib/errors";
 import { DEFAULT_USER_ID } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-
-/**
- * Zod schema for validating the catalogId URL parameter.
- * Ensures the catalogId is a valid UUID format.
- */
-const catalogParamsSchema = z.object({
-  catalogId: z.string().uuid({ message: "Invalid catalog ID." }),
-});
-
-/**
- * Zod schema for validating the request body.
- * Ensures the name is a non-empty string with a maximum length of 255 characters.
- */
-const updateCatalogBodySchema = z.object({
-  name: z.string().min(1, "Name is required.").max(255, "Name must not exceed 255 characters."),
-});
 
 /**
  * GET /api/catalogs/{catalogId}
@@ -55,16 +44,10 @@ export async function GET(request: NextRequest, context: { params: Promise<{ cat
 
     // Step 1: Validate catalogId from path parameter
     const params = await context.params;
-    const paramsValidation = catalogParamsSchema.safeParse(params);
+    const paramsValidation = CatalogIdParamSchema.safeParse(params);
 
     if (!paramsValidation.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid catalog ID.",
-          details: paramsValidation.error.flatten().fieldErrors,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError("Invalid catalog ID", paramsValidation.error.flatten().fieldErrors);
     }
 
     const { catalogId } = paramsValidation.data;
@@ -81,13 +64,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ cat
     const queryValidation = GetCatalogDetailsQuerySchema.safeParse(queryParams);
 
     if (!queryValidation.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid query parameters.",
-          details: queryValidation.error.issues,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError("Invalid query parameters", queryValidation.error.issues);
     }
 
     const validatedQuery = queryValidation.data;
@@ -97,27 +74,13 @@ export async function GET(request: NextRequest, context: { params: Promise<{ cat
 
     // Handle catalog not found or permission denied
     if (!result) {
-      return NextResponse.json(
-        {
-          error: "Catalog not found or you don't have permission to view it.",
-        },
-        { status: 404 }
-      );
+      throw new NotFoundError("Catalog not found or you don't have permission to view it.");
     }
 
     // Step 4: Return the catalog details
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
-    // Catch any unexpected errors
-    // eslint-disable-next-line no-console
-    console.error("Unexpected error in GET /api/catalogs/[catalogId]:", error);
-    return NextResponse.json(
-      {
-        error: "An unexpected server error occurred.",
-        message: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -147,16 +110,10 @@ export async function PATCH(
 
     // Step 2: Validate URL parameters
     const params = await context.params;
-    const paramsValidation = catalogParamsSchema.safeParse(params);
+    const paramsValidation = CatalogIdParamSchema.safeParse(params);
 
     if (!paramsValidation.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid catalog ID.",
-          details: paramsValidation.error.flatten().fieldErrors,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError("Invalid catalog ID", paramsValidation.error.flatten().fieldErrors);
     }
 
     const { catalogId } = paramsValidation.data;
@@ -166,80 +123,30 @@ export async function PATCH(
     try {
       requestBody = await request.json();
     } catch {
-      return NextResponse.json({ error: "Invalid JSON in request body." }, { status: 400 });
+      throw new ValidationError("Invalid JSON in request body.", [
+        {
+          code: "invalid_json",
+          message: "Invalid JSON in request body.",
+          path: ["body"],
+        },
+      ]);
     }
 
-    const bodyValidation = updateCatalogBodySchema.safeParse(requestBody);
+    const bodyValidation = UpdateCatalogCommandSchema.safeParse(requestBody);
 
     if (!bodyValidation.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid request body.",
-          details: bodyValidation.error.flatten().fieldErrors,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError("Invalid request body", bodyValidation.error.flatten().fieldErrors);
     }
 
-    const { name } = bodyValidation.data;
+    const validatedData = bodyValidation.data;
 
-    // Step 4: Fetch the catalog to verify existence and ownership
-    const { data: catalog, error: fetchError } = await supabase
-      .schema("pathly")
-      .from("catalogs")
-      .select("id, user_id, is_predefined, name")
-      .eq("id", catalogId)
-      .single();
+    // Step 4: Update the catalog using the service layer
+    const updatedCatalog = await updateCatalog(supabase, catalogId, validatedData, DEFAULT_USER_ID);
 
-    // Handle catalog not found
-    if (fetchError || !catalog) {
-      return NextResponse.json({ error: "Catalog not found." }, { status: 404 });
-    }
-
-    // Step 5: Authorization checks
-    // TODO: Replace DEFAULT_USER_ID with actual authenticated user ID once auth is implemented
-    // Check if user owns the catalog
-    if (catalog.user_id !== DEFAULT_USER_ID) {
-      return NextResponse.json(
-        { error: "Forbidden. You do not have permission to update this catalog." },
-        { status: 403 }
-      );
-    }
-
-    // Check if catalog is predefined (system catalogs cannot be modified)
-    if (catalog.is_predefined) {
-      return NextResponse.json({ error: "Forbidden. Predefined catalogs cannot be updated." }, { status: 403 });
-    }
-
-    // Step 6: Update the catalog in the database
-    const { data: updatedCatalog, error: updateError } = await supabase
-      .schema("pathly")
-      .from("catalogs")
-      .update({ name })
-      .eq("id", catalogId)
-      .select("id, name, is_predefined, created_at, updated_at")
-      .single();
-
-    // Step 7: Handle database errors
-    if (updateError) {
-      // Handle unique constraint violation (duplicate name for user)
-      if (updateError.code === "23505") {
-        return NextResponse.json({ error: "Conflict. A catalog with this name already exists." }, { status: 409 });
-      }
-
-      // Log unexpected errors for debugging
-      // eslint-disable-next-line no-console
-      console.error("Database error while updating catalog:", updateError);
-      return NextResponse.json({ error: "Internal server error. Please try again later." }, { status: 500 });
-    }
-
-    // Step 8: Return the updated catalog
+    // Step 5: Return the updated catalog
     return NextResponse.json(updatedCatalog, { status: 200 });
   } catch (error) {
-    // Catch any unexpected errors
-    // eslint-disable-next-line no-console
-    console.error("Unexpected error in PATCH /api/catalogs/[catalogId]:", error);
-    return NextResponse.json({ error: "Internal server error. Please try again later." }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
@@ -262,7 +169,7 @@ export async function PATCH(
  * @throws 500 - Internal server error
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   context: { params: Promise<{ catalogId: string }> }
 ): Promise<NextResponse> {
   try {
@@ -271,16 +178,10 @@ export async function DELETE(
 
     // Step 2: Validate URL parameters
     const params = await context.params;
-    const paramsValidation = catalogParamsSchema.safeParse(params);
+    const paramsValidation = CatalogIdParamSchema.safeParse(params);
 
     if (!paramsValidation.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid catalog ID.",
-          details: paramsValidation.error.flatten().fieldErrors,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError("Invalid catalog ID", paramsValidation.error.flatten().fieldErrors);
     }
 
     const { catalogId } = paramsValidation.data;
@@ -293,52 +194,12 @@ export async function DELETE(
     // if (authError || !user) {
     //   return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     // }
-    const userId = DEFAULT_USER_ID;
+    // Step 4: Delete the catalog using the service layer
+    await deleteCatalog(supabase, catalogId, DEFAULT_USER_ID);
 
-    // Step 4: Fetch the catalog to verify existence and ownership
-    const { data: catalog, error: fetchError } = await supabase
-      .schema("pathly")
-      .from("catalogs")
-      .select("id, user_id, is_predefined")
-      .eq("id", catalogId)
-      .single();
-
-    // Handle catalog not found
-    if (fetchError || !catalog) {
-      return NextResponse.json({ error: "Catalog not found." }, { status: 404 });
-    }
-
-    // Step 5: Authorization checks
-    // Check if user owns the catalog
-    if (catalog.user_id !== userId) {
-      return NextResponse.json(
-        { error: "Forbidden. You do not have permission to delete this catalog." },
-        { status: 403 }
-      );
-    }
-
-    // Check if catalog is predefined (system catalogs cannot be deleted)
-    if (catalog.is_predefined) {
-      return NextResponse.json({ error: "Forbidden. Predefined catalogs cannot be deleted." }, { status: 403 });
-    }
-
-    // Step 6: Delete the catalog from the database
-    const { error: deleteError } = await supabase.schema("pathly").from("catalogs").delete().eq("id", catalogId);
-
-    // Handle database errors during deletion
-    if (deleteError) {
-      // Log unexpected errors for debugging
-      // eslint-disable-next-line no-console
-      console.error("Database error while deleting catalog:", deleteError);
-      return NextResponse.json({ error: "Internal server error. Please try again later." }, { status: 500 });
-    }
-
-    // Step 7: Return success response with 204 No Content
+    // Step 5: Return success response with 204 No Content
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    // Catch any unexpected errors
-    // eslint-disable-next-line no-console
-    console.error("Unexpected error in DELETE /api/catalogs/[catalogId]:", error);
-    return NextResponse.json({ error: "Internal server error. Please try again later." }, { status: 500 });
+    return handleApiError(error);
   }
 }

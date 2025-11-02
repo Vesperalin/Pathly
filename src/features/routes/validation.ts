@@ -77,3 +77,22 @@ export const UpdateRouteCommandSchema = z
   });
 
 export type UpdateRouteCommandValidated = z.infer<typeof UpdateRouteCommandSchema>;
+
+/**
+ * Validation schema for creating a new route.
+ * Enforces all validation rules for route creation.
+ */
+export const CreateRouteCommandSchema = z.object({
+  name: z.string().min(1, "Route name is required").max(255, "Route name must not exceed 255 characters"),
+  route_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Route date must be in YYYY-MM-DD format"),
+  distance: z.number().min(0, "Distance must be a non-negative number"),
+  total_ascent: z.number().min(0, "Total ascent must be a non-negative number"),
+  total_descent: z.number().min(0, "Total descent must be a non-negative number"),
+  duration: z.number().int().min(0, "Duration must be a non-negative integer"),
+  got_points: z.number().min(0, "GOT points must be a non-negative number").optional(),
+  notes: z.string().optional(),
+  mountain_group_ids: z.array(z.string().uuid("Each mountain group ID must be a valid UUID")).optional(),
+  catalog_ids: z.array(z.string().uuid("Each catalog ID must be a valid UUID")).optional(),
+});
+
+export type CreateRouteCommand = z.infer<typeof CreateRouteCommandSchema>;

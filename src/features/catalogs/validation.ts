@@ -81,3 +81,33 @@ export const GetCatalogDetailsQuerySchema = z.object({
 });
 
 export type GetCatalogDetailsQuery = z.infer<typeof GetCatalogDetailsQuerySchema>;
+
+/**
+ * Validation schema for creating a new catalog.
+ * Ensures the name is a non-empty string with a maximum length of 255 characters.
+ */
+export const CreateCatalogCommandSchema = z.object({
+  name: z.string().min(1, "Name is required.").max(255, "Name must not exceed 255 characters."),
+});
+
+export type CreateCatalogCommand = z.infer<typeof CreateCatalogCommandSchema>;
+
+/**
+ * Validation schema for updating a catalog's name.
+ * Ensures the name is a non-empty string with a maximum length of 255 characters.
+ */
+export const UpdateCatalogCommandSchema = z.object({
+  name: z.string().min(1, "Name is required.").max(255, "Name must not exceed 255 characters."),
+});
+
+export type UpdateCatalogCommand = z.infer<typeof UpdateCatalogCommandSchema>;
+
+/**
+ * Validation schema for catalog ID URL parameter.
+ * Ensures the catalogId is a valid UUID format.
+ */
+export const CatalogIdParamSchema = z.object({
+  catalogId: z.uuid("Invalid catalog ID."),
+});
+
+export type CatalogIdParam = z.infer<typeof CatalogIdParamSchema>;

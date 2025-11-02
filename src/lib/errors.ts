@@ -51,8 +51,11 @@ export class ConflictError extends AppError {
  * Maps to HTTP 400 Bad Request.
  */
 export class ValidationError extends AppError {
-  constructor(message = "Validation failed.") {
+  public details?: unknown;
+
+  constructor(message = "Validation failed.", details?: unknown) {
     super(message);
+    this.details = details;
   }
 }
 

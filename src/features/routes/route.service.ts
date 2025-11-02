@@ -1,4 +1,5 @@
 import type { Database } from "@/db/database.types";
+import type { CreateRouteWithAssociationsResult } from "@/db/types";
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import type { CreateRouteCommand, RouteDetailsDto, UpdateRouteCommand } from "@/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -42,9 +43,7 @@ export async function createRoute(
   userId: string
 ): Promise<RouteDetailsDto> {
   // Call the PostgreSQL function that handles everything in a transaction
-  // TODO: Regenerate database types after applying migration to get proper type support
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.schema("pathly") as any).rpc("create_route_with_associations", {
+  const { data, error } = (await supabase.schema("pathly").rpc("create_route_with_associations", {
     p_user_id: userId,
     p_name: command.name,
     p_route_date: command.route_date,
@@ -52,11 +51,14 @@ export async function createRoute(
     p_total_ascent: command.total_ascent,
     p_total_descent: command.total_descent,
     p_duration: command.duration,
-    p_got_points: command.got_points ?? null,
-    p_notes: command.notes ?? null,
-    p_catalog_ids: command.catalog_ids ?? [],
-    p_mountain_group_ids: command.mountain_group_ids ?? [],
-  });
+    p_got_points: command.got_points ?? undefined,
+    p_notes: command.notes ?? undefined,
+    p_catalog_ids: command.catalog_ids ?? undefined,
+    p_mountain_group_ids: command.mountain_group_ids ?? undefined,
+  })) as {
+    data: CreateRouteWithAssociationsResult | null;
+    error: { message: string; details?: string; hint?: string; code?: string } | null;
+  };
 
   if (error) {
     // Handle specific error types based on the error message
@@ -84,13 +86,14 @@ export async function createRoute(
     }
 
     // Log unexpected errors for debugging
-    // eslint-disable-next-line no-console
-    console.error("RPC Error Details:", {
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
-      code: error.code,
-    });
+    if (process.env.NODE_ENV === "development") {
+      console.error("RPC Error Details:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
+    }
 
     throw new Error(`Failed to create route: ${error.message}`);
   }
@@ -99,8 +102,22 @@ export async function createRoute(
     throw new Error("Failed to create route: No data returned from database.");
   }
 
-  // The RPC function returns JSON, cast it to RouteDetailsDto
-  return data as unknown as RouteDetailsDto;
+  // Transform RPC result to DTO
+  return {
+    id: data.id,
+    name: data.name,
+    route_date: data.route_date,
+    distance: data.distance,
+    total_ascent: data.total_ascent,
+    total_descent: data.total_descent,
+    duration: data.duration,
+    got_points: data.got_points,
+    notes: data.notes,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+    mountain_groups: data.mountain_groups,
+    catalogs: data.catalogs,
+  };
 }
 
 /**
@@ -213,9 +230,8 @@ export async function updateRoute(
   userId: string
 ): Promise<RouteDetailsDto> {
   // Call the PostgreSQL function that handles everything in a transaction
-  // TODO: Regenerate database types after applying migration to get proper type support
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.schema("pathly") as any).rpc("update_route_with_associations", {
+  const { data, error } = (await (supabase.schema("pathly") as any).rpc("update_route_with_associations", {
     p_route_id: routeId,
     p_user_id: userId,
     p_name: command.name ?? null,
@@ -231,7 +247,10 @@ export async function updateRoute(
     p_update_notes: command.notes !== undefined,
     p_update_catalog_ids: command.catalog_ids !== undefined,
     p_update_mountain_group_ids: command.mountain_group_ids !== undefined,
-  });
+  })) as {
+    data: CreateRouteWithAssociationsResult | null;
+    error: { message: string; details?: string; hint?: string; code?: string } | null;
+  };
 
   if (error) {
     // Handle specific error types based on the error message
@@ -263,13 +282,14 @@ export async function updateRoute(
     }
 
     // Log unexpected errors for debugging
-    // eslint-disable-next-line no-console
-    console.error("RPC Error Details:", {
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
-      code: error.code,
-    });
+    if (process.env.NODE_ENV === "development") {
+      console.error("RPC Error Details:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
+    }
 
     throw new Error(`Failed to update route: ${error.message}`);
   }
@@ -278,6 +298,20 @@ export async function updateRoute(
     throw new Error("Failed to update route: No data returned from database.");
   }
 
-  // The RPC function returns JSON, cast it to RouteDetailsDto
-  return data as unknown as RouteDetailsDto;
+  // Transform RPC result to DTO
+  return {
+    id: data.id,
+    name: data.name,
+    route_date: data.route_date,
+    distance: data.distance,
+    total_ascent: data.total_ascent,
+    total_descent: data.total_descent,
+    duration: data.duration,
+    got_points: data.got_points,
+    notes: data.notes,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+    mountain_groups: data.mountain_groups,
+    catalogs: data.catalogs,
+  };
 }

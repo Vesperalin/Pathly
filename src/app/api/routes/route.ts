@@ -1,11 +1,12 @@
 import { createRoute } from "@/features/routes/route.service";
-import { GetRoutesQuerySchema } from "@/features/routes/validation";
+import { CreateRouteCommandSchema, GetRoutesQuerySchema } from "@/features/routes/validation";
+import { handleApiError } from "@/lib/apiErrors";
+import { ValidationError } from "@/lib/errors";
 import { DEFAULT_USER_ID } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
 import type { CreateRouteCommand, PaginatedRoutesDto, RouteDetailsDto, RoutePreviewDto } from "@/types";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 /**
  * GET /api/routes
@@ -47,13 +48,7 @@ export async function GET(request: NextRequest) {
     const validationResult = GetRoutesQuerySchema.safeParse(queryParams);
 
     if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid query parameters.",
-          details: validationResult.error.issues,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError("Invalid query parameters", validationResult.error.issues);
     }
 
     const { page, page_size, sort_by, order, search } = validationResult.data;
@@ -85,15 +80,10 @@ export async function GET(request: NextRequest) {
     const { data: routes, error: dbError, count } = await query;
 
     if (dbError) {
-      // eslint-disable-next-line no-console
-      console.error("Database error in GET /api/routes:", dbError);
-      return NextResponse.json(
-        {
-          error: "An unexpected error occurred while fetching routes.",
-          message: dbError.message,
-        },
-        { status: 500 }
-      );
+      if (process.env.NODE_ENV === "development") {
+        console.error("Database error in GET /api/routes:", dbError);
+      }
+      throw new Error(`Failed to fetch routes: ${dbError.message}`);
     }
 
     // Step 6: Format the response
@@ -109,35 +99,9 @@ export async function GET(request: NextRequest) {
     // Step 7: Return the paginated response
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    // Catch any unexpected errors
-    // eslint-disable-next-line no-console
-    console.error("Unexpected error in GET /api/routes:", error);
-    return NextResponse.json(
-      {
-        error: "An unexpected server error occurred.",
-        message: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
-
-/**
- * Zod schema for validating the request body when creating a new route.
- * Enforces all validation rules for route creation.
- */
-const CreateRouteCommandSchema = z.object({
-  name: z.string().min(1, "Route name is required").max(255, "Route name must not exceed 255 characters"),
-  route_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Route date must be in YYYY-MM-DD format"),
-  distance: z.number().min(0, "Distance must be a non-negative number"),
-  total_ascent: z.number().min(0, "Total ascent must be a non-negative number"),
-  total_descent: z.number().min(0, "Total descent must be a non-negative number"),
-  duration: z.number().int().min(0, "Duration must be a non-negative integer"),
-  got_points: z.number().min(0, "GOT points must be a non-negative number").optional(),
-  notes: z.string().optional(),
-  mountain_group_ids: z.array(z.string().uuid("Each mountain group ID must be a valid UUID")).optional(),
-  catalog_ids: z.array(z.string().uuid("Each catalog ID must be a valid UUID")).optional(),
-});
 
 /**
  * POST /api/routes
@@ -177,19 +141,19 @@ export async function POST(request: NextRequest) {
     try {
       requestBody = await request.json();
     } catch {
-      return NextResponse.json({ error: "Invalid JSON in request body." }, { status: 400 });
+      throw new ValidationError("Invalid JSON in request body.", [
+        {
+          code: "invalid_json",
+          message: "Invalid JSON in request body.",
+          path: ["body"],
+        },
+      ]);
     }
 
     const validationResult = CreateRouteCommandSchema.safeParse(requestBody);
 
     if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          error: "Validation failed.",
-          details: validationResult.error.issues,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError("Validation failed", validationResult.error.issues);
     }
 
     const validatedData: CreateRouteCommand = validationResult.data;
@@ -201,32 +165,6 @@ export async function POST(request: NextRequest) {
     // Step 4: Return the created route
     return NextResponse.json(createdRoute, { status: 201 });
   } catch (error) {
-    // Handle specific error types
-    const errorMessage = error instanceof Error ? error.message : String(error);
-
-    // Check for duplicate route name
-    if (errorMessage.includes("A route with the name")) {
-      return NextResponse.json({ error: errorMessage }, { status: 409 });
-    }
-
-    // Check for validation errors from the service layer
-    if (
-      errorMessage.includes("catalog") ||
-      errorMessage.includes("mountain group") ||
-      errorMessage.includes("GOT points")
-    ) {
-      return NextResponse.json({ error: errorMessage }, { status: 400 });
-    }
-
-    // Log unexpected errors
-    // eslint-disable-next-line no-console
-    console.error("Unexpected error in POST /api/routes:", error);
-    return NextResponse.json(
-      {
-        error: "An unexpected server error occurred.",
-        message: errorMessage,
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

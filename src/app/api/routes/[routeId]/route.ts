@@ -1,6 +1,7 @@
 import { getRouteDetails, updateRoute } from "@/features/routes/route.service";
 import { RouteIdParamSchema, UpdateRouteCommandSchema } from "@/features/routes/validation";
-import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
+import { handleApiError } from "@/lib/apiErrors";
+import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { DEFAULT_USER_ID } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
@@ -28,7 +29,7 @@ import { NextResponse } from "next/server";
  * - 404: Route not found
  * - 500: Internal server error
  */
-export async function DELETE(request: Request, context: { params: Promise<{ routeId: string }> }) {
+export async function DELETE(_request: Request, context: { params: Promise<{ routeId: string }> }) {
   try {
     // Step 1: Initialize Supabase server client
     const supabase = await createClient();
@@ -38,13 +39,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ rout
     const validationResult = RouteIdParamSchema.safeParse({ routeId: params.routeId });
 
     if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid route ID format.",
-          details: validationResult.error.issues,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError("Invalid route ID format.", validationResult.error.issues);
     }
 
     const { routeId } = validationResult.data;
@@ -59,8 +54,9 @@ export async function DELETE(request: Request, context: { params: Promise<{ rout
       .single();
 
     if (fetchError) {
-      // eslint-disable-next-line no-console
-      console.error("Database error fetching route for deletion:", fetchError);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Database error fetching route for deletion:", fetchError);
+      }
 
       // If the error code indicates no rows, the route doesn't exist
       if (fetchError.code === "PGRST116") {
@@ -85,33 +81,16 @@ export async function DELETE(request: Request, context: { params: Promise<{ rout
     const { error: deleteError } = await supabase.schema("pathly").from("routes").delete().eq("id", routeId);
 
     if (deleteError) {
-      // eslint-disable-next-line no-console
-      console.error("Database error deleting route:", deleteError);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Database error deleting route:", deleteError);
+      }
       throw new Error(deleteError.message);
     }
 
     // Step 6: Return success response with 204 No Content
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    // Handle known application errors with appropriate status codes
-    if (error instanceof NotFoundError) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
-    }
-
-    if (error instanceof ForbiddenError) {
-      return NextResponse.json({ error: error.message }, { status: 403 });
-    }
-
-    // Handle unexpected errors
-    // eslint-disable-next-line no-console
-    console.error("Unexpected error in DELETE /api/routes/[routeId]:", error);
-    return NextResponse.json(
-      {
-        error: "An unexpected error occurred while deleting the route.",
-        message: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -135,20 +114,14 @@ export async function DELETE(request: Request, context: { params: Promise<{ rout
  * - 404: Route not found or does not belong to the user
  * - 500: Internal server error
  */
-export async function GET(request: Request, context: { params: Promise<{ routeId: string }> }) {
+export async function GET(_request: Request, context: { params: Promise<{ routeId: string }> }) {
   try {
     // Step 1 & 2: Extract and validate routeId parameter
     const params = await context.params;
     const validationResult = RouteIdParamSchema.safeParse(params);
 
     if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid route ID format.",
-          details: validationResult.error.issues,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError("Invalid route ID format.", validationResult.error.issues);
     }
 
     const { routeId } = validationResult.data;
@@ -162,28 +135,13 @@ export async function GET(request: Request, context: { params: Promise<{ routeId
 
     // Step 5: Handle not found case
     if (!route) {
-      return NextResponse.json(
-        {
-          error: "Route not found.",
-          message: "The requested route does not exist or you do not have permission to access it.",
-        },
-        { status: 404 }
-      );
+      throw new NotFoundError("The requested route does not exist or you do not have permission to access it.");
     }
 
     // Step 6: Return the route details
     return NextResponse.json(route, { status: 200 });
   } catch (error) {
-    // Catch any unexpected errors
-    // eslint-disable-next-line no-console
-    console.error("Unexpected error in GET /api/routes/[routeId]:", error);
-    return NextResponse.json(
-      {
-        error: "An unexpected server error occurred.",
-        message: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -225,13 +183,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ route
     const paramValidation = RouteIdParamSchema.safeParse(params);
 
     if (!paramValidation.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid route ID format.",
-          details: paramValidation.error.issues,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError("Invalid route ID format.", paramValidation.error.issues);
     }
 
     const { routeId } = paramValidation.data;
@@ -241,24 +193,19 @@ export async function PATCH(request: Request, context: { params: Promise<{ route
     try {
       requestBody = await request.json();
     } catch {
-      return NextResponse.json(
+      throw new ValidationError("Invalid JSON in request body.", [
         {
-          error: "Invalid JSON in request body.",
+          code: "invalid_json",
+          message: "Invalid JSON in request body.",
+          path: ["body"],
         },
-        { status: 400 }
-      );
+      ]);
     }
 
     const bodyValidation = UpdateRouteCommandSchema.safeParse(requestBody);
 
     if (!bodyValidation.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid request body.",
-          details: bodyValidation.error.issues,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError("Invalid request body.", bodyValidation.error.issues);
     }
 
     const validatedCommand = bodyValidation.data;
@@ -273,56 +220,6 @@ export async function PATCH(request: Request, context: { params: Promise<{ route
     // Step 5: Return the updated route details
     return NextResponse.json(updatedRoute, { status: 200 });
   } catch (error) {
-    // Handle custom error types from the service layer
-    if (error instanceof NotFoundError) {
-      return NextResponse.json(
-        {
-          error: "Not found.",
-          message: error.message,
-        },
-        { status: 404 }
-      );
-    }
-
-    if (error instanceof ForbiddenError) {
-      return NextResponse.json(
-        {
-          error: "Forbidden.",
-          message: error.message,
-        },
-        { status: 403 }
-      );
-    }
-
-    if (error instanceof ConflictError) {
-      return NextResponse.json(
-        {
-          error: "Conflict.",
-          message: error.message,
-        },
-        { status: 409 }
-      );
-    }
-
-    if (error instanceof ValidationError) {
-      return NextResponse.json(
-        {
-          error: "Validation error.",
-          message: error.message,
-        },
-        { status: 400 }
-      );
-    }
-
-    // Catch any unexpected errors
-    // eslint-disable-next-line no-console
-    console.error("Unexpected error in PATCH /api/routes/[routeId]:", error);
-    return NextResponse.json(
-      {
-        error: "An unexpected server error occurred.",
-        message: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

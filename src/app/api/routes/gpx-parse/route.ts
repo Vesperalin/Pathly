@@ -1,4 +1,6 @@
 import { GpxParsingService } from "@/features/gpx/gpx-parsing.service";
+import { handleApiError } from "@/lib/apiErrors";
+import { ValidationError } from "@/lib/errors";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -18,10 +20,13 @@ export async function POST(request: NextRequest) {
 
     // 2. Validate that files were provided
     if (!gpxFiles || gpxFiles.length === 0) {
-      return NextResponse.json(
-        { error: "No GPX files provided. Please upload at least one .gpx file." },
-        { status: 400 }
-      );
+      throw new ValidationError("No GPX files provided. Please upload at least one .gpx file.", [
+        {
+          code: "no_files",
+          message: "No GPX files provided. Please upload at least one .gpx file.",
+          path: [],
+        },
+      ]);
     }
 
     // 3. Validate file types and convert to File array
@@ -29,7 +34,13 @@ export async function POST(request: NextRequest) {
     for (const file of gpxFiles) {
       // Check if it's a string (invalid) or File/Blob
       if (typeof file === "string") {
-        return NextResponse.json({ error: "Invalid file format. Expected file upload, got string." }, { status: 400 });
+        throw new ValidationError("Invalid file format. Expected file upload, got string.", [
+          {
+            code: "invalid_file_type",
+            message: "Invalid file format. Expected file upload, got string.",
+            path: ["gpxFiles"],
+          },
+        ]);
       }
 
       // TypeScript narrowing: at this point file is File | Blob
@@ -38,12 +49,24 @@ export async function POST(request: NextRequest) {
 
       // Check for .gpx extension
       if (!fileObj.name.toLowerCase().endsWith(".gpx")) {
-        return NextResponse.json(
+        throw new ValidationError(`Invalid file type: ${fileObj.name}. Only .gpx files are allowed.`, [
           {
-            error: `Invalid file type: ${fileObj.name}. Only .gpx files are allowed.`,
+            code: "invalid_extension",
+            message: `Invalid file type: ${fileObj.name}. Only .gpx files are allowed.`,
+            path: ["gpxFiles", fileObj.name],
           },
-          { status: 400 }
-        );
+        ]);
+      }
+
+      if (fileObj.size > 10 * 1024 * 1024) {
+        const sizeMB = Math.round(fileObj.size / (1024 * 1024));
+        throw new ValidationError(`File too large: ${fileObj.name} (${sizeMB}MB). Maximum allowed size is 10MB.`, [
+          {
+            code: "file_too_large",
+            message: `File too large: ${fileObj.name} (${sizeMB}MB). Maximum allowed size is 10MB.`,
+            path: ["gpxFiles", fileObj.name],
+          },
+        ]);
       }
 
       validFiles.push(fileObj);
@@ -56,33 +79,6 @@ export async function POST(request: NextRequest) {
     // 5. Return the aggregated data
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
-    // Log the error for debugging
-    // eslint-disable-next-line no-console
-    console.error("Error parsing GPX files:", error);
-
-    // Distinguish between parsing errors (400) and server errors (500)
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-
-    // If the error message indicates a parsing issue, return 400
-    if (
-      errorMessage.includes("Failed to parse") ||
-      errorMessage.includes("contains no tracks") ||
-      errorMessage.includes("No files provided")
-    ) {
-      return NextResponse.json(
-        {
-          error: `GPX parsing error: ${errorMessage}`,
-        },
-        { status: 400 }
-      );
-    }
-
-    // For all other errors, return 500
-    return NextResponse.json(
-      {
-        error: "An internal server error occurred while processing your GPX files.",
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
