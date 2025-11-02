@@ -39,7 +39,7 @@ export default tseslint.config(
       ...jsxA11y.flatConfigs.recommended.rules,
       "react/react-in-jsx-scope": "off",
       "react-compiler/react-compiler": "error",
-      "no-console": "warn",
+      "no-console": ["error", { allow: ["warn", "error"] }],
       "no-unused-vars": "off",
     },
     languageOptions: {

@@ -52,7 +52,7 @@ CREATE TYPE pathly.analytics_event_type_enum AS ENUM (
 | `user_id`       | `uuid`          | `NOT NULL`, `REFERENCES auth.users ON DELETE CASCADE` |
 | `name`          | `varchar(255)`  | `NOT NULL`                                            |
 | `route_date`    | `date`          | `NOT NULL`                                            |
-| `got_points`    | `smallint`      | `NOT NULL`, `CHECK (got_points >= 0)`                 |
+| `got_points`    | `smallint`      | `CHECK (got_points >= 0)`                             |
 | `distance`      | `numeric(7, 2)` | `NOT NULL`, `CHECK (distance >= 0)`                   |
 | `total_ascent`  | `numeric(6, 2)` | `NOT NULL`, `CHECK (total_ascent >= 0)`               |
 | `total_descent` | `numeric(6, 2)` | `NOT NULL`, `CHECK (total_descent >= 0)`              |
@@ -68,8 +68,8 @@ CREATE TYPE pathly.analytics_event_type_enum AS ENUM (
 | Column Name | Data Type      | Constraints                                |
 | ----------- | -------------- | ------------------------------------------ |
 | `id`        | `uuid`         | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` |
-| `name`      | `varchar(255)` | `NOT NULL`, `UNIQUE`                       |
-| `symbol`    | `varchar(40)`  | `NOT NULL`, `UNIQUE`                       |
+| `name`      | `varchar(255)` | `NOT NULL`                                 |
+| `symbol`    | `varchar(40)`  | `NOT NULL`                                 |
 
 ---
 

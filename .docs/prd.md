@@ -55,7 +55,7 @@ Pathly ma na celu zaoferowanie prostej, intuicyjnej i zintegrowanej platformy, k
 - W przypadku braku daty w pliku GPX, użytkownik ma możliwość wprowadzenia jej ręcznie.
 - Ręczne wprowadzanie danych przez użytkownika:
   - Nazwa trasy.
-  - Liczba punktów GOT.
+  - Opcjonalnie liczba punktów GOT.
   - Opcjonalne przypisanie jednej lub wielu grup górskich do trasy.
   - Opcjonalne notatki.
 - Możliwość przypisania jednej trasy do wielu katalogów (zarówno predefiniowanych, jak i własnych) w momencie jej tworzenia oraz późniejszej edycji.

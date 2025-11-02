@@ -1,0 +1,192 @@
+---
+alwaysApply: false
+---
+
+# Supabase Next.js Integration
+
+This document provides a reproducible guide to create the necessary file structure for integrating Supabase with Next.js project.
+
+## Prerequisites
+
+- Your project should use Next.js 15, TypeScript 5, React 19, and Tailwind 4.
+- Install the `@supabase/supabase-js` and `@supabase/ssr` packages.
+- Ensure that a file `/src/db/database.types.ts` exists and contains the correct type definitions for your database.
+
+IMPORTANT: Check prerequisites before performing actions below. If they're not met, stop and ask a user for the fix.
+
+## File Structure and Setup
+
+### 1. Environment Variables
+
+Create a file named `.env.local` in the root of your project and add the following variables. You can get these from your Supabase project's API settings.
+
+```.env.local
+NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+```
+
+### 2. Supabase Client for Client Components
+
+Create the file `/src/lib/supabase/client.ts` with the following content:
+
+```ts
+import { createBrowserClient } from "@supabase/ssr";
+
+import type { Database } from "@/db/database.types";
+
+export function createClient() {
+  return createBrowserClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+```
+
+This file exports a function to create a Supabase client for use in Client Components.
+
+### 3. Supabase Client for Server Components
+
+Create the file `/src/lib/supabase/server.ts` with the following content:
+
+```ts
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+
+import type { Database } from "@/db/database.types";
+
+export function createClient() {
+  const cookieStore = cookies();
+
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options) {
+          try {
+            cookieStore.set({ name, value, ...options });
+          } catch (error) {
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+        remove(name: string, options) {
+          try {
+            cookieStore.set({ name, value: "", ...options });
+          } catch (error) {
+            // The `delete` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  );
+}
+```
+
+This file sets up a Supabase client for server-side rendering, using cookies to manage authentication. This client is for use in Server Components, Route Handlers, and Server Actions.
+
+### 4. Middleware Setup
+
+Create the file `/src/middleware.ts` to refresh user sessions.
+
+```ts
+import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+
+import type { Database } from "@/db/database.types";
+
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options) {
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove(name: string, options) {
+          request.cookies.set({
+            name,
+            value: "",
+            ...options,
+          });
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          response.cookies.set({
+            name,
+            value: "",
+            ...options,
+          });
+        },
+      },
+    }
+  );
+
+  await supabase.auth.getUser();
+
+  return response;
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * Feel free to modify this pattern to include more paths.
+     */
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+  ],
+};
+```
+
+This middleware is crucial for keeping the user's session active. It runs for most requests and refreshes the auth token if necessary.
+
+### 5. Add Path Alias
+
+To make imports cleaner (e.g., `import type { Database } from '@/db/database.types'`), add a path alias to your `tsconfig.json` file under `compilerOptions`:
+
+```json
+{
+  "compilerOptions": {
+    // ... other options
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+  // ... other config
+}
+```
