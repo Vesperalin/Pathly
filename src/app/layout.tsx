@@ -1,35 +1,20 @@
+import { FALLBACK_LOCALE, isSupportedLocale } from "@/lib/i18n/locales";
 import "@/styles/globals.css";
-import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { ReactNode } from "react";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+interface RootLayoutProps {
+  children: ReactNode;
+  params: {
+    locale?: string;
+  };
+}
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+export default function RootLayout({ children, params }: RootLayoutProps) {
+  const locale = isSupportedLocale(params.locale) ? params.locale : FALLBACK_LOCALE;
 
-export const metadata: Metadata = {
-  title: "",
-  description: "",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-        </ThemeProvider>
-      </body>
+    <html lang={locale} suppressHydrationWarning>
+      <body className="min-h-screen bg-background font-sans antialiased">{children}</body>
     </html>
   );
 }

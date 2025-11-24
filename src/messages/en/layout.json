@@ -1,0 +1,21 @@
+{
+  "logo": {
+    "name": "Pathly"
+  },
+  "metadata": {
+    "title": "Pathly – your GOT badge companion",
+    "description": "Track mountain routes and GOT points with Pathly, the digital logbook for PTTK badge collectors."
+  },
+  "nav": {
+    "ariaLabel": "Main navigation",
+    "dashboard": "Dashboard",
+    "routes": "All routes",
+    "settings": "Settings"
+  },
+  "mobileHeader": {
+    "menu": "Menu",
+    "openSideNavigation": "Open navigation",
+    "closeSideNavigation": "Close navigation",
+    "menuDescription": "Primary navigation links"
+  }
+}
