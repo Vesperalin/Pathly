@@ -65,6 +65,15 @@
         "placeholder": "np. Wypady rodzinne"
       }
     },
+    "validation": {
+      "name": {
+        "minLength": "Nazwa katalogu musi mieć co najmniej 3 znaki.",
+        "maxLength": "Nazwa katalogu nie może mieć więcej niż 255 znaków."
+      }
+    },
+    "state": {
+      "saving": "Zapisywanie…"
+    },
     "errors": {
       "conflict": "Katalog o tej nazwie już istnieje.",
       "unknown": "Nie udało się zapisać katalogu. Spróbuj ponownie."

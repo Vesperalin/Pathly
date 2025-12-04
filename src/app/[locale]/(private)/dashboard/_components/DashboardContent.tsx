@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  CatalogFormModal,
-  type CatalogFormMode,
-  type CatalogFormValues,
-} from "@/app/[locale]/(private)/dashboard/_components/CatalogFormModal";
 import { CatalogList } from "@/app/[locale]/(private)/dashboard/_components/CatalogList";
 import { DeleteConfirmationDialog } from "@/app/[locale]/(private)/dashboard/_components/DeleteConfirmationDialog";
 import {
@@ -15,11 +10,13 @@ import {
   updateCatalog,
   userCatalogsKey,
 } from "@/features/catalogs/catalog.api";
-import type { CatalogPreviewDto } from "@/types";
+import { CatalogFormModal } from "@/features/catalogs/components/CatalogFormModal";
+import type { CatalogPreviewDto, CreateCatalogCommand, UpdateCatalogCommand } from "@/types";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import useSWR from "swr";
+import { z } from "zod";
 
 export interface DashboardContentProps {
   initialPredefinedCatalogs: CatalogPreviewDto[];
@@ -28,10 +25,7 @@ export interface DashboardContentProps {
   userError?: boolean;
 }
 
-interface SubmissionError {
-  field?: keyof CatalogFormValues;
-  message: string;
-}
+type CatalogFormMode = "create" | "edit";
 
 export default function DashboardContent({
   initialPredefinedCatalogs,
@@ -43,7 +37,6 @@ export default function DashboardContent({
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<CatalogFormMode>("create");
   const [editingCatalog, setEditingCatalog] = useState<CatalogPreviewDto | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingCatalog, setDeletingCatalog] = useState<CatalogPreviewDto | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -70,6 +63,7 @@ export default function DashboardContent({
   const closeFormModal = useCallback(() => {
     setIsFormOpen(false);
     setEditingCatalog(null);
+    setFormMode("create");
   }, []);
 
   const openCreateModal = useCallback(() => {
@@ -98,13 +92,34 @@ export default function DashboardContent({
     void mutateUserCatalogs();
   }, [mutateUserCatalogs]);
 
+  const catalogFormSchema = useMemo(
+    () =>
+      z.object({
+        name: z
+          .string()
+          .min(3, translation("form.validation.name.minLength"))
+          .max(255, translation("form.validation.name.maxLength")),
+      }),
+    [translation]
+  );
+
+  const handleModalOpenChange = useCallback(
+    (nextIsOpen: boolean) => {
+      setIsFormOpen(nextIsOpen);
+
+      if (!nextIsOpen) {
+        setEditingCatalog(null);
+        setFormMode("create");
+      }
+    },
+    []
+  );
+
   const handleFormSubmit = useCallback(
-    async (values: CatalogFormValues) => {
-      setIsSubmitting(true);
+    async (values: CreateCatalogCommand | UpdateCatalogCommand) => {
+      let updatedCatalog: CatalogPreviewDto;
 
       try {
-        let updatedCatalog: CatalogPreviewDto;
-
         if (formMode === "create") {
           updatedCatalog = await createCatalog(values);
           toast.success(translation("form.toast.created"));
@@ -127,25 +142,16 @@ export default function DashboardContent({
       } catch (error) {
         if (error instanceof CatalogApiError) {
           if (error.status === 409) {
-            const submissionError: SubmissionError = {
-              field: "name",
-              message: translation("form.errors.conflict"),
-            };
-            throw submissionError;
+            throw new Error(translation("form.errors.conflict"));
           }
 
-          const submissionError: SubmissionError = {
-            message: error.message || translation("form.errors.unknown"),
-          };
-          throw submissionError;
+          const message = error.message || translation("form.errors.unknown");
+          toast.error(message);
+          throw new Error(message);
         }
 
-        const submissionError: SubmissionError = {
-          message: translation("form.errors.unknown"),
-        };
-        throw submissionError;
-      } finally {
-        setIsSubmitting(false);
+        toast.error(translation("form.errors.unknown"));
+        throw new Error(translation("form.errors.unknown"));
       }
     },
     [closeFormModal, editingCatalog, formMode, mutateUserCatalogs, translation]
@@ -256,19 +262,17 @@ export default function DashboardContent({
 
       <CatalogFormModal
         isOpen={isFormOpen}
-        mode={formMode}
-        defaultValues={editingCatalog ? { name: editingCatalog.name } : { name: "" }}
-        isSubmitting={isSubmitting}
-        copy={{
-          title: formMode === "create" ? translation("form.create.title") : translation("form.edit.title"),
-          submit: formMode === "create" ? translation("form.create.submit") : translation("form.edit.submit"),
-          cancel: translation("form.cancel"),
-          fieldLabel: translation("form.fields.name.label"),
-          fieldPlaceholder: translation("form.fields.name.placeholder"),
-          unknownError: translation("form.errors.unknown"),
-        }}
-        onClose={closeFormModal}
+        onOpenChange={handleModalOpenChange}
         onSubmit={handleFormSubmit}
+        initialData={formMode === "edit" ? editingCatalog ?? undefined : undefined}
+        texts={{
+          titleCreate: translation("form.create.title"),
+          titleEdit: translation("form.edit.title"),
+          labelName: translation("form.fields.name.label"),
+          buttonSave: formMode === "create" ? translation("form.create.submit") : translation("form.edit.submit"),
+          buttonSaving: translation("form.state.saving"),
+        }}
+        validationSchema={catalogFormSchema}
       />
 
       <DeleteConfirmationDialog

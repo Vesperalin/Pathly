@@ -3,10 +3,6 @@
 import { CatalogDetailsBreadcrumbs } from "@/app/[locale]/(private)/catalogs/[catalogId]/_components/CatalogDetailsBreadcrumbs";
 import { CatalogDetailsHeader } from "@/app/[locale]/(private)/catalogs/[catalogId]/_components/CatalogDetailsHeader";
 import { RouteList } from "@/app/[locale]/(private)/catalogs/[catalogId]/_components/RouteList";
-import {
-  CatalogFormModal,
-  type CatalogFormValues,
-} from "@/app/[locale]/(private)/dashboard/_components/CatalogFormModal";
 import { DeleteConfirmationDialog } from "@/app/[locale]/(private)/dashboard/_components/DeleteConfirmationDialog";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -16,20 +12,17 @@ import {
   deleteCatalog,
   updateCatalog,
 } from "@/features/catalogs/catalog.api";
-import type { CatalogDetailsDto, PaginatedResponse, RouteInCatalogDto } from "@/types";
+import { CatalogFormModal } from "@/features/catalogs/components/CatalogFormModal";
+import type { CatalogDetailsDto, PaginatedResponse, RouteInCatalogDto, UpdateCatalogCommand } from "@/types";
 import { useTranslations } from "next-intl";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import useSWRInfinite from "swr/infinite";
+import { z } from "zod";
 
 export interface CatalogDetailsViewProps {
   initialData: CatalogDetailsDto;
-}
-
-interface SubmissionError {
-  field?: keyof CatalogFormValues;
-  message: string;
 }
 
 export default function CatalogDetailsView({ initialData }: CatalogDetailsViewProps) {
@@ -41,7 +34,6 @@ export default function CatalogDetailsView({ initialData }: CatalogDetailsViewPr
   const [isFetchingNext, setIsFetchingNext] = useState(false);
   const [hasLoadMoreError, setHasLoadMoreError] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -183,6 +175,21 @@ export default function CatalogDetailsView({ initialData }: CatalogDetailsViewPr
     setIsFormOpen(true);
   }, []);
 
+  const catalogFormSchema = useMemo(
+    () =>
+      z.object({
+        name: z
+          .string()
+          .min(3, translation("form.validation.name.minLength"))
+          .max(255, translation("form.validation.name.maxLength")),
+      }),
+    [translation]
+  );
+
+  const handleModalOpenChange = useCallback((nextIsOpen: boolean) => {
+    setIsFormOpen(nextIsOpen);
+  }, []);
+
   const openDeleteDialog = useCallback(() => {
     setIsDeleteDialogOpen(true);
   }, []);
@@ -192,9 +199,7 @@ export default function CatalogDetailsView({ initialData }: CatalogDetailsViewPr
   }, []);
 
   const handleFormSubmit = useCallback(
-    async (values: CatalogFormValues) => {
-      setIsSubmitting(true);
-
+    async (values: UpdateCatalogCommand) => {
       try {
         const updatedCatalog = await updateCatalog(catalogDetails.id, values);
         setCatalogDetails((current) => ({
@@ -207,25 +212,16 @@ export default function CatalogDetailsView({ initialData }: CatalogDetailsViewPr
       } catch (error) {
         if (error instanceof CatalogApiError) {
           if (error.status === 409) {
-            const submissionError: SubmissionError = {
-              field: "name",
-              message: translation("form.errors.conflict"),
-            };
-            throw submissionError;
+            throw new Error(translation("form.errors.conflict"));
           }
 
-          const submissionError: SubmissionError = {
-            message: error.message || translation("form.errors.unknown"),
-          };
-          throw submissionError;
+          const message = error.message || translation("form.errors.unknown");
+          toast.error(message);
+          throw new Error(message);
         }
 
-        const submissionError: SubmissionError = {
-          message: translation("form.errors.unknown"),
-        };
-        throw submissionError;
-      } finally {
-        setIsSubmitting(false);
+        toast.error(translation("form.errors.unknown"));
+        throw new Error(translation("form.errors.unknown"));
       }
     },
     [catalogDetails.id, closeForm, translation]
@@ -274,19 +270,17 @@ export default function CatalogDetailsView({ initialData }: CatalogDetailsViewPr
       />
       <CatalogFormModal
         isOpen={isFormOpen}
-        mode="edit"
-        defaultValues={{ name: catalogDetails.name }}
-        isSubmitting={isSubmitting}
-        copy={{
-          title: translation("form.title"),
-          submit: translation("form.submit"),
-          cancel: translation("form.cancel"),
-          fieldLabel: translation("form.fieldLabel"),
-          fieldPlaceholder: translation("form.fieldPlaceholder"),
-          unknownError: translation("form.errors.unknown"),
-        }}
-        onClose={closeForm}
+        onOpenChange={handleModalOpenChange}
         onSubmit={handleFormSubmit}
+        initialData={catalogDetails}
+        texts={{
+          titleCreate: translation("form.title"),
+          titleEdit: translation("form.title"),
+          labelName: translation("form.fieldLabel"),
+          buttonSave: translation("form.submit"),
+          buttonSaving: translation("form.state.saving"),
+        }}
+        validationSchema={catalogFormSchema}
       />
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}

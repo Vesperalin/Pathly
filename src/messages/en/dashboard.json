@@ -65,6 +65,15 @@
         "placeholder": "e.g. Family hikes"
       }
     },
+    "validation": {
+      "name": {
+        "minLength": "Catalog name must be at least 3 characters.",
+        "maxLength": "Catalog name must not exceed 255 characters."
+      }
+    },
+    "state": {
+      "saving": "Saving…"
+    },
     "errors": {
       "conflict": "A catalog with this name already exists.",
       "unknown": "Unable to save catalog. Please try again."
