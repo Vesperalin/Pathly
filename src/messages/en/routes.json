@@ -1,7 +1,8 @@
 {
   "breadcrumbs": {
     "home": "Routes",
-    "list": "All routes"
+    "list": "All routes",
+    "details": "Route details"
   },
   "title": "Routes",
   "description": "Browse, filter, and manage all registered routes.",
@@ -45,5 +46,47 @@
     "title": "We couldn't load routes",
     "description": "Something went wrong while loading your routes. Please try again. If the problem persists, contact support.",
     "retry": "Try again"
+  },
+  "details": {
+    "header": {
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+      }
+    },
+    "metadata": {
+      "title": "Route overview",
+      "fields": {
+        "date": "Date",
+        "points": "GOT pts",
+        "distance": "Distance",
+        "duration": "Duration",
+        "ascent": "Total ascent",
+        "descent": "Total descent"
+      },
+      "emptyValue": "—"
+    },
+    "mountainGroups": {
+      "title": "Mountain groups",
+      "empty": "No mountain groups assigned."
+    },
+    "catalogs": {
+      "title": "Catalogs",
+      "empty": "This route is not assigned to any catalog."
+    },
+    "notes": {
+      "title": "Notes",
+      "empty": "No notes added."
+    },
+    "deleteDialog": {
+      "title": "Delete route",
+      "description": "This action permanently removes the route. This cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "toast": {
+      "deleteSuccess": "Route deleted.",
+      "deleteError": "We couldn't delete the route. Please try again."
+    }
   }
 }

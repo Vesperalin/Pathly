@@ -1,7 +1,8 @@
 {
   "breadcrumbs": {
     "home": "Trasy",
-    "list": "Wszystkie trasy"
+    "list": "Wszystkie trasy",
+    "details": "Szczegóły trasy"
   },
   "title": "Trasy",
   "description": "Przeglądaj, filtruj i zarządzaj wszystkimi zarejestrowanymi trasami.",
@@ -45,5 +46,47 @@
     "title": "Nie udało się załadować tras",
     "description": "Podczas ładowania tras wystąpił błąd. Spróbuj ponownie. Jeśli problem się powtórzy, skontaktuj się z pomocą techniczną.",
     "retry": "Spróbuj ponownie"
+  },
+  "details": {
+    "header": {
+      "actions": {
+        "edit": "Edytuj",
+        "delete": "Usuń"
+      }
+    },
+    "metadata": {
+      "title": "Podsumowanie trasy",
+      "fields": {
+        "date": "Data",
+        "points": "Punkty GOT",
+        "distance": "Dystans",
+        "duration": "Czas trwania",
+        "ascent": "Przewyższenie w górę",
+        "descent": "Przewyższenie w dół"
+      },
+      "emptyValue": "—"
+    },
+    "mountainGroups": {
+      "title": "Grupy górskie",
+      "empty": "Brak przypisanych grup górskich."
+    },
+    "catalogs": {
+      "title": "Katalogi",
+      "empty": "Trasa nie jest przypisana do żadnego katalogu."
+    },
+    "notes": {
+      "title": "Notatki",
+      "empty": "Brak notatek."
+    },
+    "deleteDialog": {
+      "title": "Usuń trasę",
+      "description": "Ta operacja trwale usuwa trasę. Tego działania nie można cofnąć.",
+      "cancel": "Anuluj",
+      "confirm": "Usuń"
+    },
+    "toast": {
+      "deleteSuccess": "Trasa została usunięta.",
+      "deleteError": "Nie udało się usunąć trasy. Spróbuj ponownie."
+    }
   }
 }
