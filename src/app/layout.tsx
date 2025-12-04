@@ -1,3 +1,4 @@
+import { ThemeProvider } from "@/components/theme-provider";
 import { FALLBACK_LOCALE, isSupportedLocale } from "@/lib/i18n/locales";
 import "@/styles/globals.css";
 import type { ReactNode } from "react";
@@ -14,7 +15,9 @@ export default function RootLayout({ children, params }: RootLayoutProps) {
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-sans antialiased">{children}</body>
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

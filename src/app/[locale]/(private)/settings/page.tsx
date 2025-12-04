@@ -1,21 +1,23 @@
-"use client";
+import { getProfile } from "@/features/profiles/profile.service";
+import { DEFAULT_USER_ID } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
+import type { ProfileDto } from "@/types";
+import { notFound } from "next/navigation";
+import SettingsView from "./SettingsView";
 
-import { BreadcrumbsSetter } from "@/components/layout/BreadcrumbsContext";
-import { useTranslations } from "next-intl";
+async function fetchProfile(): Promise<ProfileDto> {
+  const supabase = await createClient();
+  const profile = await getProfile(supabase, DEFAULT_USER_ID);
 
-export default function SettingsPage() {
-  const translation = useTranslations("settings");
+  if (!profile) {
+    notFound();
+  }
 
-  return (
-    <div className="flex flex-col gap-6">
-      <BreadcrumbsSetter items={[{ label: translation("breadcrumbs.home") }]} />
-      <section className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{translation("title")}</h1>
-        <p className="text-muted-foreground">{translation("description")}</p>
-      </section>
-      <div className="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-        <p className="text-sm text-muted-foreground">{translation("comingSoon")}</p>
-      </div>
-    </div>
-  );
+  return profile;
+}
+
+export default async function SettingsPage() {
+  const profile = await fetchProfile();
+
+  return <SettingsView initialProfile={profile} />;
 }
