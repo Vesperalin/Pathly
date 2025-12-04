@@ -1,6 +1,5 @@
 "use client";
 
-import { BreadcrumbsSetter } from "@/components/layout/BreadcrumbsContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { patchProfile } from "@/features/profiles/profile.api";
@@ -13,6 +12,7 @@ import { useParams, usePathname, useRouter, useSearchParams } from "next/navigat
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { LanguageSwitcher } from "./_components/LanguageSwitcher";
+import { SettingsBreadcrumbs } from "./_components/SettingsBreadcrumbs";
 import { ThemeSwitcher } from "./_components/ThemeSwitcher";
 
 interface SettingsViewProps {
@@ -185,7 +185,7 @@ export default function SettingsView({ initialProfile }: SettingsViewProps) {
   if (error && !profile) {
     return (
       <div className="flex flex-col gap-6">
-        <BreadcrumbsSetter items={[{ label: translation("breadcrumbs.home") }]} />
+        <SettingsBreadcrumbs />
         {headerSection}
         <Card>
           <CardHeader>
@@ -203,7 +203,7 @@ export default function SettingsView({ initialProfile }: SettingsViewProps) {
   if (!profile) {
     return (
       <div className="flex flex-col gap-6">
-        <BreadcrumbsSetter items={[{ label: translation("breadcrumbs.home") }]} />
+        <SettingsBreadcrumbs />
         {headerSection}
         <Card>
           <CardContent>
@@ -219,7 +219,7 @@ export default function SettingsView({ initialProfile }: SettingsViewProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <BreadcrumbsSetter items={[{ label: translation("breadcrumbs.home") }]} />
+      <SettingsBreadcrumbs />
       {headerSection}
 
       <Card>
