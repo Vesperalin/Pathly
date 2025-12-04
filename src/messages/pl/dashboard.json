@@ -5,5 +5,87 @@
   },
   "title": "Pulpit",
   "description": "Monitoruj postępy w zdobywaniu odznaki GOT. Znajdziesz tu wgląd w swoje trasy, postępy i najbliższe cele.",
-  "comingSoon": "Zawartość pulpitu pojawi się wkrótce."
+  "comingSoon": "Zawartość pulpitu pojawi się wkrótce.",
+  "header": {
+    "cta": "Dodaj nową trasę"
+  },
+  "sections": {
+    "predefined": {
+      "title": "Katalogi predefiniowane",
+      "empty": {
+        "title": "Katalogi predefiniowane pojawią się wkrótce",
+        "description": "Pracujemy nad oficjalnymi rekomendacjami GOT. Wróć tu niebawem."
+      }
+    },
+    "user": {
+      "title": "Moje katalogi",
+      "actions": {
+        "add": "Dodaj katalog"
+      },
+      "empty": {
+        "title": "Nie masz jeszcze katalogów",
+        "description": "Utwórz własny katalog, aby grupować ważne dla Ciebie trasy."
+      }
+    }
+  },
+  "catalogList": {
+    "headers": {
+      "name": "Katalog",
+      "points": "Punkty GOT",
+      "updatedAt": "Zaktualizowano"
+    },
+    "actions": {
+      "label": "Akcje",
+      "edit": "Edytuj",
+      "delete": "Usuń"
+    },
+    "refreshing": "Odświeżanie danych…"
+  },
+  "status": {
+    "loading": "Ładowanie katalogów…",
+    "error": {
+      "title": "Nie udało się wczytać katalogów.",
+      "description": "Sprawdź połączenie i spróbuj ponownie.",
+      "retry": "Spróbuj ponownie"
+    }
+  },
+  "form": {
+    "create": {
+      "title": "Nowy katalog",
+      "submit": "Utwórz"
+    },
+    "edit": {
+      "title": "Edytuj katalog",
+      "submit": "Zapisz zmiany"
+    },
+    "cancel": "Anuluj",
+    "fields": {
+      "name": {
+        "label": "Nazwa katalogu",
+        "placeholder": "np. Wypady rodzinne"
+      }
+    },
+    "errors": {
+      "conflict": "Katalog o tej nazwie już istnieje.",
+      "unknown": "Nie udało się zapisać katalogu. Spróbuj ponownie."
+    },
+    "toast": {
+      "created": "Katalog został utworzony.",
+      "updated": "Katalog został zaktualizowany.",
+      "error": "Nie udało się zapisać katalogu. Spróbuj ponownie."
+    }
+  },
+  "deleteDialog": {
+    "title": "Usuń katalog",
+    "description": "Ta operacja trwale usuwa katalog. Przypisane trasy pozostaną dostępne.",
+    "confirm": "Usuń",
+    "cancel": "Anuluj",
+    "toast": {
+      "success": "Katalog został usunięty.",
+      "error": "Nie udało się usunąć katalogu."
+    }
+  },
+  "toast": {
+    "fetchError": "Nie udało się odświeżyć listy katalogów."
+  }
 }

@@ -5,5 +5,87 @@
   },
   "title": "Dashboard",
   "description": "Monitor your progress toward the GOT badge. Insights, recent trips, and upcoming goals will appear here.",
-  "comingSoon": "Dashboard content is coming soon."
+  "comingSoon": "Dashboard content is coming soon.",
+  "header": {
+    "cta": "Add new route"
+  },
+  "sections": {
+    "predefined": {
+      "title": "Predefined catalogs",
+      "empty": {
+        "title": "Predefined catalogs are on the way",
+        "description": "We’re curating official GOT recommendations. Check back soon."
+      }
+    },
+    "user": {
+      "title": "My catalogs",
+      "actions": {
+        "add": "Add catalog"
+      },
+      "empty": {
+        "title": "No personal catalogs yet",
+        "description": "Create your own catalog to group hikes that matter to you."
+      }
+    }
+  },
+  "catalogList": {
+    "headers": {
+      "name": "Catalog",
+      "points": "GOT pts",
+      "updatedAt": "Updated"
+    },
+    "actions": {
+      "label": "Actions",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "refreshing": "Refreshing data…"
+  },
+  "status": {
+    "loading": "Loading catalogs…",
+    "error": {
+      "title": "We couldn’t load your catalogs.",
+      "description": "Check your connection and try again.",
+      "retry": "Retry"
+    }
+  },
+  "form": {
+    "create": {
+      "title": "Create catalog",
+      "submit": "Create"
+    },
+    "edit": {
+      "title": "Edit catalog",
+      "submit": "Save changes"
+    },
+    "cancel": "Cancel",
+    "fields": {
+      "name": {
+        "label": "Catalog name",
+        "placeholder": "e.g. Family hikes"
+      }
+    },
+    "errors": {
+      "conflict": "A catalog with this name already exists.",
+      "unknown": "Unable to save catalog. Please try again."
+    },
+    "toast": {
+      "created": "Catalog created.",
+      "updated": "Catalog updated.",
+      "error": "Unable to save catalog. Please try again."
+    }
+  },
+  "deleteDialog": {
+    "title": "Delete catalog",
+    "description": "This action permanently removes the catalog. Routes inside remain available.",
+    "confirm": "Delete",
+    "cancel": "Cancel",
+    "toast": {
+      "success": "Catalog deleted.",
+      "error": "Unable to delete catalog."
+    }
+  },
+  "toast": {
+    "fetchError": "We couldn’t refresh the catalog list."
+  }
 }

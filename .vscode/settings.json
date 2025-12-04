@@ -23,5 +23,14 @@
   "eslint.format.enable": false,
   "eslint.codeActionsOnSave.mode": "all",
   "prettier.requireConfig": true,
-  "cSpell.words": ["fkey", "pathly", "predefiniowanych", "SUPABASE", "Szlakownik", "timestamptz", "turbopack"]
+  "cSpell.words": [
+    "fkey",
+    "pathly",
+    "predefiniowane",
+    "predefiniowanych",
+    "SUPABASE",
+    "Szlakownik",
+    "timestamptz",
+    "turbopack"
+  ]
 }
