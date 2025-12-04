@@ -5,5 +5,45 @@
   },
   "title": "Trasy",
   "description": "Przeglądaj, filtruj i zarządzaj wszystkimi zarejestrowanymi trasami.",
-  "comingSoon": "Moduł zarządzania trasami pojawi się wkrótce."
+  "header": {
+    "cta": "Dodaj nową trasę"
+  },
+  "toolbar": {
+    "search": {
+      "placeholder": "Szukaj tras..."
+    },
+    "sort": {
+      "label": "Sortuj według",
+      "options": {
+        "nameAsc": "Nazwa A-Z",
+        "nameDesc": "Nazwa Z-A",
+        "dateDesc": "Najnowsze najpierw",
+        "dateAsc": "Najstarsze najpierw"
+      }
+    }
+  },
+  "list": {
+    "columns": {
+      "name": "Trasa",
+      "date": "Data",
+      "distance": "Dystans",
+      "points": "Punkty GOT"
+    },
+    "empty": {
+      "title": "Brak tras",
+      "description": "Nie dodałaś jeszcze żadnej trasy. Zaimportuj plik GPX lub dodaj wycieczkę ręcznie.",
+      "cta": "Dodaj pierwszą trasę"
+    },
+    "refreshing": "Odświeżanie danych..."
+  },
+  "pagination": {
+    "previous": "Poprzednia",
+    "next": "Następna",
+    "pageOf": "Strona {page} z {totalPages}"
+  },
+  "error": {
+    "title": "Nie udało się załadować tras",
+    "description": "Podczas ładowania tras wystąpił błąd. Spróbuj ponownie. Jeśli problem się powtórzy, skontaktuj się z pomocą techniczną.",
+    "retry": "Spróbuj ponownie"
+  }
 }

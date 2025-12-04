@@ -5,5 +5,45 @@
   },
   "title": "Routes",
   "description": "Browse, filter, and manage all registered routes.",
-  "comingSoon": "Routes management tools are coming soon."
+  "header": {
+    "cta": "Add new route"
+  },
+  "toolbar": {
+    "search": {
+      "placeholder": "Search routes..."
+    },
+    "sort": {
+      "label": "Sort by",
+      "options": {
+        "nameAsc": "Name A-Z",
+        "nameDesc": "Name Z-A",
+        "dateDesc": "Newest first",
+        "dateAsc": "Oldest first"
+      }
+    }
+  },
+  "list": {
+    "columns": {
+      "name": "Route",
+      "date": "Date",
+      "distance": "Distance",
+      "points": "GOT pts"
+    },
+    "empty": {
+      "title": "No routes yet",
+      "description": "You haven't added any routes. Import a GPX file or log a trip manually to get started.",
+      "cta": "Add your first route"
+    },
+    "refreshing": "Refreshing data..."
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {totalPages}"
+  },
+  "error": {
+    "title": "We couldn't load routes",
+    "description": "Something went wrong while loading your routes. Please try again. If the problem persists, contact support.",
+    "retry": "Try again"
+  }
 }
