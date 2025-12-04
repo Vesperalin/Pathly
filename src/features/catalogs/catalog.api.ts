@@ -1,4 +1,12 @@
-import type { CatalogPreviewDto, CreateCatalogCommand, PaginatedCatalogsDto, UpdateCatalogCommand } from "@/types";
+import type {
+  CatalogDetailsDto,
+  CatalogPreviewDto,
+  CreateCatalogCommand,
+  PaginatedCatalogsDto,
+  PaginatedResponse,
+  RouteInCatalogDto,
+  UpdateCatalogCommand,
+} from "@/types";
 
 const CATALOGS_ENDPOINT = "/api/catalogs";
 
@@ -110,4 +118,66 @@ export function catalogsFetcher(url: string): Promise<CatalogPreviewDto[]> {
   const typeParam = new URLSearchParams(url.split("?")[1] ?? "");
   const type = (typeParam.get("type") as CatalogType) ?? "user";
   return fetchCatalogs({ type });
+}
+
+export function catalogRoutesKey(catalogId: string, page: number, pageSize?: number): string {
+  const searchParams = new URLSearchParams();
+  searchParams.set("page", String(page));
+  if (pageSize) {
+    searchParams.set("page_size", String(pageSize));
+  }
+
+  const query = searchParams.toString();
+  return `${CATALOGS_ENDPOINT}/${catalogId}/routes${query ? `?${query}` : ""}`;
+}
+
+export async function fetchCatalogRoutes(
+  catalogId: string,
+  page: number,
+  pageSize?: number
+): Promise<PaginatedResponse<RouteInCatalogDto>> {
+  const url = catalogRoutesKey(catalogId, page, pageSize);
+  return fetchCatalogRoutesFromUrl(url);
+}
+
+export async function fetchCatalogDetails(
+  catalogId: string,
+  params?: { routes_page?: number; routes_page_size?: number }
+): Promise<CatalogDetailsDto> {
+  const url = new URL(
+    `${CATALOGS_ENDPOINT}/${catalogId}`,
+    typeof window === "undefined" ? "http://localhost" : window.location.origin
+  );
+
+  if (params?.routes_page) {
+    url.searchParams.set("routes_page", String(params.routes_page));
+  }
+
+  if (params?.routes_page_size) {
+    url.searchParams.set("routes_page_size", String(params.routes_page_size));
+  }
+
+  const response = await fetch(url.toString(), {
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  return handleResponse<CatalogDetailsDto>(response);
+}
+
+export function catalogRoutesFetcher(url: string): Promise<PaginatedResponse<RouteInCatalogDto>> {
+  return fetchCatalogRoutesFromUrl(url);
+}
+
+async function fetchCatalogRoutesFromUrl(url: string): Promise<PaginatedResponse<RouteInCatalogDto>> {
+  const response = await fetch(url, {
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  return handleResponse<PaginatedResponse<RouteInCatalogDto>>(response);
 }
