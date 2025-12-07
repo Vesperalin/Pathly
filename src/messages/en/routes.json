@@ -230,5 +230,24 @@
       "conflict": "A route with this name already exists.",
       "validation": "Please check the form for details and try again."
     }
+  },
+  "edit": {
+    "breadcrumbs": {
+      "list": "Routes",
+      "edit": "Edit route"
+    },
+    "title": "Edit route",
+    "titleWithName": "Edit route: {routeName}",
+    "description": "Update the route details to keep your log accurate.",
+    "form": {
+      "actions": {
+        "submit": "Save changes",
+        "submitting": "Saving…"
+      }
+    },
+    "toast": {
+      "success": "Route updated.",
+      "unknownError": "We couldn't update the route. Please try again."
+    }
   }
 }

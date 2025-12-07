@@ -230,5 +230,24 @@
       "conflict": "Trasa o tej nazwie już istnieje.",
       "validation": "Sprawdź formularz i spróbuj ponownie."
     }
+  },
+  "edit": {
+    "breadcrumbs": {
+      "list": "Trasy",
+      "edit": "Edytuj trasę"
+    },
+    "title": "Edytuj trasę",
+    "titleWithName": "Edytuj trasę: {routeName}",
+    "description": "Zaktualizuj dane trasy, aby Twój dziennik był aktualny.",
+    "form": {
+      "actions": {
+        "submit": "Zapisz zmiany",
+        "submitting": "Zapisywanie…"
+      }
+    },
+    "toast": {
+      "success": "Trasa została zaktualizowana.",
+      "unknownError": "Nie udało się zaktualizować trasy. Spróbuj ponownie."
+    }
   }
 }
