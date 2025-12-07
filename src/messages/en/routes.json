@@ -88,5 +88,147 @@
       "deleteSuccess": "Route deleted.",
       "deleteError": "We couldn't delete the route. Please try again."
     }
+  },
+  "create": {
+    "breadcrumbs": {
+      "list": "Routes",
+      "new": "Add route"
+    },
+    "title": "Add a new route",
+    "description": "Import a GPX file to autofill details or enter them manually.",
+    "sections": {
+      "file": {
+        "title": "Import GPX",
+        "description": "Upload a GPX file to prefill metrics like distance, elevation, and duration."
+      },
+      "gpxData": {
+        "title": "Route data",
+        "description": "Review imported values and adjust them if needed.",
+        "summary": {
+          "title": "Prefilled metrics",
+          "empty": "Upload a GPX file to prefill these metrics."
+        },
+        "actions": {
+          "clear": "Clear GPX values"
+        }
+      },
+      "manualData": {
+        "title": "Route details",
+        "description": "Provide essential information about your hike."
+      },
+      "associations": {
+        "title": "Associations",
+        "description": "Assign catalogs and mountain groups."
+      }
+    },
+    "units": {
+      "kilometer": "km",
+      "meter": "m"
+    },
+    "form": {
+      "fields": {
+        "name": {
+          "label": "Route name",
+          "placeholder": "e.g. Tatra Ridge traverse"
+        },
+        "route_date": {
+          "label": "Date",
+          "placeholder": "Select a date"
+        },
+        "distance": {
+          "label": "Distance (km)",
+          "placeholder": "e.g. 12.4"
+        },
+        "total_ascent": {
+          "label": "Total ascent (m)",
+          "placeholder": "e.g. 980"
+        },
+        "total_descent": {
+          "label": "Total descent (m)",
+          "placeholder": "e.g. 960"
+        },
+        "duration": {
+          "label": "Duration (hh:mm)",
+          "placeholder": "e.g. 05:45"
+        },
+        "got_points": {
+          "label": "GOT points",
+          "placeholder": "e.g. 12"
+        },
+        "notes": {
+          "label": "Notes",
+          "placeholder": "Add any context you want to remember."
+        },
+        "mountain_group_ids": {
+          "label": "Mountain groups",
+          "placeholder": "Select mountain groups"
+        },
+        "catalog_ids": {
+          "label": "Catalogs",
+          "placeholder": "Select catalogs",
+          "predefinedLabel": "Predefined catalog"
+        }
+      },
+      "actions": {
+        "submit": "Save route",
+        "submitting": "Saving…"
+      }
+    },
+    "fileUploader": {
+      "title": "Upload GPX file",
+      "description": "Drag and drop your GPX file here, or click to browse.",
+      "hint": "Only .gpx files are supported.",
+      "buttonIdle": "Browse files",
+      "buttonParsing": "Parsing…",
+      "error": {
+        "multiple": "Only one GPX file can be imported at a time."
+      }
+    },
+    "toast": {
+      "success": "Route saved.",
+      "parseSuccess": "GPX parsed. Metrics updated.",
+      "parseError": "We couldn't process the GPX file. Check the format and try again.",
+      "unknownError": "We couldn't save the route. Please try again."
+    },
+    "validation": {
+      "name": {
+        "required": "Route name is required.",
+        "minLength": "Route name must be at least 3 characters.",
+        "maxLength": "Route name must not exceed 255 characters."
+      },
+      "route_date": {
+        "required": "Date is required."
+      },
+      "distance": {
+        "required": "Distance is required.",
+        "nonNegative": "Distance must be zero or greater."
+      },
+      "total_ascent": {
+        "required": "Total ascent is required.",
+        "nonNegative": "Total ascent must be zero or greater."
+      },
+      "total_descent": {
+        "required": "Total descent is required.",
+        "nonNegative": "Total descent must be zero or greater."
+      },
+      "duration": {
+        "required": "Duration is required.",
+        "format": "Duration must be in HH:MM format."
+      },
+      "got_points": {
+        "requiredForPredefined": "GOT points are required when you choose a predefined catalog.",
+        "nonNegative": "GOT points must be zero or greater."
+      },
+      "mountain_group_ids": {
+        "max": "Select up to {limit} mountain groups."
+      },
+      "catalog_ids": {
+        "max": "Select up to {limit} catalogs."
+      }
+    },
+    "errors": {
+      "conflict": "A route with this name already exists.",
+      "validation": "Please check the form for details and try again."
+    }
   }
 }

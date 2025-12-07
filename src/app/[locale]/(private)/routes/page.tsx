@@ -3,8 +3,10 @@ import { GetRoutesQuerySchema, type GetRoutesQuery } from "@/features/routes/val
 import type { PaginatedRoutesDto } from "@/types";
 import { cookies, headers } from "next/headers";
 
+type SearchParamsRecord = Record<string, string | string[] | undefined>;
+
 interface AllRoutesPageProps {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<SearchParamsRecord> | SearchParamsRecord;
 }
 
 async function resolveBaseUrl(): Promise<string> {
@@ -28,7 +30,7 @@ async function resolveBaseUrl(): Promise<string> {
   return "http://localhost:3000";
 }
 
-function coerceQuery(searchParams: Record<string, string | string[] | undefined>): GetRoutesQuery {
+function coerceQuery(searchParams: SearchParamsRecord): GetRoutesQuery {
   const extractValue = (value: string | string[] | undefined) => {
     if (Array.isArray(value)) {
       return value.at(-1) ?? undefined;
@@ -84,7 +86,9 @@ async function fetchRoutes(query: GetRoutesQuery): Promise<PaginatedRoutesDto> {
 }
 
 export default async function AllRoutesPage({ searchParams }: AllRoutesPageProps) {
-  const query = coerceQuery(searchParams);
+  const resolvedSearchParams = await searchParams;
+
+  const query = coerceQuery(resolvedSearchParams);
   const initialData = await fetchRoutes(query);
 
   const normalizedSearchParams: Record<string, string | undefined> = {

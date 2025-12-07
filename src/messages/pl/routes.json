@@ -88,5 +88,147 @@
       "deleteSuccess": "Trasa została usunięta.",
       "deleteError": "Nie udało się usunąć trasy. Spróbuj ponownie."
     }
+  },
+  "create": {
+    "breadcrumbs": {
+      "list": "Trasy",
+      "new": "Dodaj trasę"
+    },
+    "title": "Dodaj nową trasę",
+    "description": "Zaimportuj plik GPX lub uzupełnij dane ręcznie.",
+    "sections": {
+      "file": {
+        "title": "Import GPX",
+        "description": "Prześlij plik GPX, aby wstępnie wypełnić dystans, przewyższenia i czas trwania."
+      },
+      "gpxData": {
+        "title": "Dane trasy",
+        "description": "Sprawdź zaimportowane wartości i w razie potrzeby je popraw.",
+        "summary": {
+          "title": "Wstępnie uzupełnione dane",
+          "empty": "Prześlij plik GPX, aby wypełnić te pola."
+        },
+        "actions": {
+          "clear": "Wyczyść dane z GPX"
+        }
+      },
+      "manualData": {
+        "title": "Szczegóły trasy",
+        "description": "Uzupełnij najważniejsze informacje o wycieczce."
+      },
+      "associations": {
+        "title": "Powiązania",
+        "description": "Przypisz katalogi i grupy górskie."
+      }
+    },
+    "units": {
+      "kilometer": "km",
+      "meter": "m"
+    },
+    "form": {
+      "fields": {
+        "name": {
+          "label": "Nazwa trasy",
+          "placeholder": "np. Grań Tatr Wysokich"
+        },
+        "route_date": {
+          "label": "Data",
+          "placeholder": "Wybierz datę"
+        },
+        "distance": {
+          "label": "Dystans (km)",
+          "placeholder": "np. 12.4"
+        },
+        "total_ascent": {
+          "label": "Przewyższenie w górę (m)",
+          "placeholder": "np. 980"
+        },
+        "total_descent": {
+          "label": "Przewyższenie w dół (m)",
+          "placeholder": "np. 960"
+        },
+        "duration": {
+          "label": "Czas trwania (hh:mm)",
+          "placeholder": "np. 05:45"
+        },
+        "got_points": {
+          "label": "Punkty GOT",
+          "placeholder": "np. 12"
+        },
+        "notes": {
+          "label": "Notatki",
+          "placeholder": "Dodaj informacje, o których chcesz pamiętać."
+        },
+        "mountain_group_ids": {
+          "label": "Grupy górskie",
+          "placeholder": "Wybierz grupy górskie"
+        },
+        "catalog_ids": {
+          "label": "Katalogi",
+          "placeholder": "Wybierz katalogi",
+          "predefinedLabel": "Katalog predefiniowany"
+        }
+      },
+      "actions": {
+        "submit": "Zapisz trasę",
+        "submitting": "Zapisywanie…"
+      }
+    },
+    "fileUploader": {
+      "title": "Wyślij plik GPX",
+      "description": "Przeciągnij i upuść plik GPX tutaj lub kliknij, aby przeglądać.",
+      "hint": "Obsługiwane są tylko pliki .gpx.",
+      "buttonIdle": "Przeglądaj pliki",
+      "buttonParsing": "Trwa parsowanie…",
+      "error": {
+        "multiple": "Możesz wgrać tylko jeden plik GPX naraz."
+      }
+    },
+    "toast": {
+      "success": "Trasa została zapisana.",
+      "parseSuccess": "Plik GPX został przetworzony. Dane zaktualizowano.",
+      "parseError": "Nie udało się przetworzyć pliku GPX. Sprawdź format i spróbuj ponownie.",
+      "unknownError": "Nie udało się zapisać trasy. Spróbuj ponownie."
+    },
+    "validation": {
+      "name": {
+        "required": "Nazwa trasy jest wymagana.",
+        "minLength": "Nazwa trasy musi mieć co najmniej 3 znaki.",
+        "maxLength": "Nazwa trasy nie może mieć więcej niż 255 znaków."
+      },
+      "route_date": {
+        "required": "Data jest wymagana."
+      },
+      "distance": {
+        "required": "Dystans jest wymagany.",
+        "nonNegative": "Dystans musi być większy lub równy zero."
+      },
+      "total_ascent": {
+        "required": "Przewyższenie w górę jest wymagane.",
+        "nonNegative": "Przewyższenie w górę musi być większe lub równe zero."
+      },
+      "total_descent": {
+        "required": "Przewyższenie w dół jest wymagane.",
+        "nonNegative": "Przewyższenie w dół musi być większe lub równe zero."
+      },
+      "duration": {
+        "required": "Czas trwania jest wymagany.",
+        "format": "Czas trwania musi być w formacie HH:MM."
+      },
+      "got_points": {
+        "requiredForPredefined": "Punkty GOT są wymagane, gdy wybierzesz katalog predefiniowany.",
+        "nonNegative": "Punkty GOT muszą być większe lub równe zero."
+      },
+      "mountain_group_ids": {
+        "max": "Wybierz maksymalnie {limit} grup górskich."
+      },
+      "catalog_ids": {
+        "max": "Wybierz maksymalnie {limit} katalogów."
+      }
+    },
+    "errors": {
+      "conflict": "Trasa o tej nazwie już istnieje.",
+      "validation": "Sprawdź formularz i spróbuj ponownie."
+    }
   }
 }

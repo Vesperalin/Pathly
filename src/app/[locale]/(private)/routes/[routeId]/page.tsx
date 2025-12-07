@@ -4,9 +4,13 @@ import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 interface RouteDetailsPageProps {
-  params: {
-    routeId?: string;
-  };
+  params:
+    | Promise<{
+        routeId?: string;
+      }>
+    | {
+        routeId?: string;
+      };
 }
 
 async function resolveBaseUrl(): Promise<string> {
@@ -63,7 +67,8 @@ async function fetchRouteDetails(routeId: string): Promise<RouteDetailsDto> {
 }
 
 export default async function RouteDetailsPage({ params }: RouteDetailsPageProps) {
-  const routeId = params.routeId;
+  const resolvedParams = await params;
+  const routeId = resolvedParams.routeId;
   if (!routeId) {
     notFound();
   }

@@ -67,8 +67,11 @@ async function fetchCatalogs(type: CatalogType): Promise<FetchCatalogsResult> {
   }
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const translation = await getTranslations("dashboard");
+  const localePrefix = locale ? `/${locale}` : "";
+  const createRouteHref = localePrefix ? `${localePrefix}/routes/new` : "/routes/new";
 
   const [predefinedResult, userResult] = await Promise.all([fetchCatalogs("predefined"), fetchCatalogs("user")]);
 
@@ -79,7 +82,7 @@ export default async function DashboardPage() {
         title={translation("title")}
         description={translation("description")}
         ctaLabel={translation("header.cta")}
-        ctaHref="/routes/new"
+        ctaHref={createRouteHref}
       />
       <DashboardContent
         initialPredefinedCatalogs={predefinedResult.catalogs}
