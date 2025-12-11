@@ -1,0 +1,65 @@
+{
+  "breadcrumbs": {
+    "catalogs": "Catalogs"
+  },
+  "details": {
+    "header": {
+      "totalPointsLabel": "Total GOT points",
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+      }
+    },
+    "form": {
+      "title": "Edit catalog",
+      "submit": "Save changes",
+      "cancel": "Cancel",
+      "fieldLabel": "Catalog name",
+      "fieldPlaceholder": "e.g. Family hikes",
+      "validation": {
+        "name": {
+          "minLength": "Catalog name must be at least 3 characters.",
+          "maxLength": "Catalog name must not exceed 255 characters."
+        }
+      },
+      "state": {
+        "saving": "Saving…"
+      },
+      "errors": {
+        "conflict": "A catalog with this name already exists.",
+        "unknown": "Unable to update catalog. Please try again."
+      }
+    },
+    "routeList": {
+      "headers": {
+        "name": "Route",
+        "date": "Date",
+        "points": "GOT pts"
+      },
+      "loading": "Loading routes…",
+      "loadMore": "Load more",
+      "empty": {
+        "title": "No routes yet",
+        "description": "Routes added to this catalog will appear here."
+      },
+      "error": {
+        "title": "We couldn’t load more routes.",
+        "action": "Try again"
+      }
+    },
+    "deleteDialog": {
+      "title": "Delete catalog",
+      "description": "This action permanently removes the catalog. Routes inside remain available.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "toast": {
+      "updateSuccess": "Catalog updated.",
+      "updateError": "Unable to update catalog.",
+      "deleteSuccess": "Catalog deleted.",
+      "deleteError": "Unable to delete catalog.",
+      "routesError": "We couldn’t load more routes."
+    }
+  }
+}
+

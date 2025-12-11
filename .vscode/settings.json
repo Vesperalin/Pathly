@@ -7,8 +7,30 @@
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "eslint.run": "onSave",
   "eslint.format.enable": false,
   "eslint.codeActionsOnSave.mode": "all",
-  "cSpell.words": ["fkey", "pathly", "predefiniowanych", "SUPABASE", "Szlakownik", "timestamptz", "turbopack"]
+  "prettier.requireConfig": true,
+  "cSpell.words": [
+    "fkey",
+    "pathly",
+    "predefiniowane",
+    "predefiniowanych",
+    "SUPABASE",
+    "Szlakownik",
+    "timestamptz",
+    "turbopack"
+  ]
 }

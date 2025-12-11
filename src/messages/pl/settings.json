@@ -1,0 +1,52 @@
+{
+  "breadcrumbs": {
+    "home": "Ustawienia"
+  },
+  "title": "Ustawienia",
+  "description": "Spersonalizuj Pathly zgodnie ze swoimi potrzebami na szlaku.",
+  "personalization": {
+    "title": "Personalizacja",
+    "description": "Dostosuj język i motyw interfejsu.",
+    "language": {
+      "label": "Język",
+      "description": "Wybierz język interfejsu.",
+      "options": {
+        "en": "Angielski",
+        "pl": "Polski"
+      },
+      "toast": {
+        "success": "Język został zaktualizowany.",
+        "error": "Nie udało się zaktualizować języka. Spróbuj ponownie."
+      }
+    },
+    "theme": {
+      "label": "Motyw",
+      "description": "Wybierz wygląd Pathly.",
+      "options": {
+        "light": "Jasny",
+        "dark": "Ciemny",
+        "system": "Systemowy"
+      },
+      "toast": {
+        "success": "Motyw został zaktualizowany.",
+        "error": "Nie udało się zaktualizować motywu. Spróbuj ponownie."
+      }
+    }
+  },
+  "security": {
+    "title": "Bezpieczeństwo",
+    "description": "Opcje bezpieczeństwa pojawią się wraz z logowaniem.",
+    "placeholder": "Ustawienia bezpieczeństwa będą dostępne po włączeniu uwierzytelniania."
+  },
+  "toast": {
+    "revert": "Zmiany zostały cofnięte."
+  },
+  "status": {
+    "loading": "Wczytywanie Twoich ustawień personalizacji…",
+    "error": {
+      "title": "Nie udało się wczytać ustawień.",
+      "description": "Sprawdź połączenie i spróbuj ponownie.",
+      "retry": "Ponów próbę"
+    }
+  }
+}

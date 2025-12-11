@@ -83,6 +83,37 @@ export const GetCatalogDetailsQuerySchema = z.object({
 export type GetCatalogDetailsQuery = z.infer<typeof GetCatalogDetailsQuerySchema>;
 
 /**
+ * Validation schema for GET /api/catalogs/{catalogId}/routes query parameters.
+ * Mirrors the pagination behaviour for catalog routes.
+ */
+export const GetCatalogRoutesQuerySchema = z.object({
+  page: z
+    .union([z.string(), z.null(), z.undefined()])
+    .optional()
+    .default("1")
+    .transform((val) => parseInt(val || "1", 10))
+    .pipe(z.number().int().min(1)),
+  page_size: z
+    .union([z.string(), z.null(), z.undefined()])
+    .optional()
+    .default("10")
+    .transform((val) => parseInt(val || "10", 10))
+    .pipe(z.number().int().min(1).max(100)),
+  sort_by: z
+    .union([z.enum(["name", "route_date"]), z.null(), z.undefined()])
+    .optional()
+    .default("route_date")
+    .transform((val) => (val === null || val === undefined ? "route_date" : val)),
+  order: z
+    .union([z.enum(["asc", "desc"]), z.null(), z.undefined()])
+    .optional()
+    .default("desc")
+    .transform((val) => (val === null || val === undefined ? "desc" : val)),
+});
+
+export type GetCatalogRoutesQuery = z.infer<typeof GetCatalogRoutesQuerySchema>;
+
+/**
  * Validation schema for creating a new catalog.
  * Ensures the name is a non-empty string with a maximum length of 255 characters.
  */

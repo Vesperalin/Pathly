@@ -1,0 +1,21 @@
+{
+  "logo": {
+    "name": "Pathly"
+  },
+  "metadata": {
+    "title": "Pathly – Twój towarzysz w drodze po GOT",
+    "description": "Śledź górskie trasy i punkty GOT z Pathly – cyfrową książeczką dla kolekcjonerów odznaki PTTK."
+  },
+  "nav": {
+    "ariaLabel": "Nawigacja główna",
+    "dashboard": "Pulpit",
+    "routes": "Wszystkie trasy",
+    "settings": "Ustawienia"
+  },
+  "mobileHeader": {
+    "menu": "Menu",
+    "openSideNavigation": "Otwórz nawigację",
+    "closeSideNavigation": "Zamknij nawigację",
+    "menuDescription": "Główne linki nawigacyjne"
+  }
+}

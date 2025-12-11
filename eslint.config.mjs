@@ -55,6 +55,9 @@ export default tseslint.config(
         typescript: {
           alwaysTryTypes: true,
         },
+        node: {
+          extensions: [".js", ".jsx", ".ts", ".tsx"],
+        },
       },
     },
   },

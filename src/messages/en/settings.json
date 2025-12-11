@@ -1,0 +1,52 @@
+{
+  "breadcrumbs": {
+    "home": "Settings"
+  },
+  "title": "Settings",
+  "description": "Personalize Pathly to match your hiking experience.",
+  "personalization": {
+    "title": "Personalization",
+    "description": "Adjust language and theme preferences.",
+    "language": {
+      "label": "Language",
+      "description": "Select the interface language.",
+      "options": {
+        "en": "English",
+        "pl": "Polish"
+      },
+      "toast": {
+        "success": "Language updated.",
+        "error": "Unable to update language. Please try again."
+      }
+    },
+    "theme": {
+      "label": "Theme",
+      "description": "Choose how Pathly looks.",
+      "options": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "toast": {
+        "success": "Theme updated.",
+        "error": "Unable to update theme. Please try again."
+      }
+    }
+  },
+  "security": {
+    "title": "Security",
+    "description": "Account security options will arrive with sign-in.",
+    "placeholder": "Security settings will become available once authentication is enabled."
+  },
+  "toast": {
+    "revert": "Changes were reverted."
+  },
+  "status": {
+    "loading": "Loading your personalization settings…",
+    "error": {
+      "title": "We couldn’t load your settings.",
+      "description": "Please check your connection and try again.",
+      "retry": "Retry"
+    }
+  }
+}
