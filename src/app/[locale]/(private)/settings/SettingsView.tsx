@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChangePasswordForm } from "@/features/auth/components/ChangePasswordForm";
 import { patchProfile } from "@/features/profiles/profile.api";
 import { useProfile } from "@/hooks/useProfile";
 import { SUPPORTED_LOCALES, type SupportedLocale } from "@/lib/i18n/locales";
@@ -242,8 +243,12 @@ export default function SettingsView({ initialProfile }: SettingsViewProps) {
           <CardTitle>{translation("security.title")}</CardTitle>
           <CardDescription>{translation("security.description")}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">{translation("security.placeholder")}</p>
+        <CardContent className="space-y-6">
+          <section className="space-y-2">
+            <p className="text-sm font-medium text-foreground">{translation("security.changePassword.title")}</p>
+            <p className="text-sm text-muted-foreground">{translation("security.changePassword.description")}</p>
+          </section>
+          <ChangePasswordForm />
         </CardContent>
       </Card>
     </div>

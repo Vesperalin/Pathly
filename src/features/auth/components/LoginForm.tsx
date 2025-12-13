@@ -85,16 +85,9 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
         <FieldError id="login-password-error" message={errors.password?.message} />
       </div>
 
-      <div className="flex flex-col gap-4">
-        <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="w-full">
-          {isSubmitting ? t("form.actions.submitting") : t("form.actions.submit")}
-        </Button>
-        <div className="text-center text-sm">
-          <Link href={scopedPath("/forgot-password")} className="font-medium text-primary hover:underline">
-            {t("form.actions.forgotPassword")}
-          </Link>
-        </div>
-      </div>
+      <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="w-full">
+        {isSubmitting ? t("form.actions.submitting") : t("form.actions.submit")}
+      </Button>
 
       <p className="text-center text-sm text-muted-foreground">
         {t("form.actions.switchPrefix")}{" "}

@@ -17,5 +17,13 @@
     "openSideNavigation": "Otwórz nawigację",
     "closeSideNavigation": "Zamknij nawigację",
     "menuDescription": "Główne linki nawigacyjne"
+  },
+  "logout": {
+    "actions": {
+      "logout": "Wyloguj się",
+      "loggingOut": "Wylogowywanie…"
+    },
+    "placeholder": "Wylogowanie będzie dostępne po włączeniu uwierzytelniania.",
+    "error": "Nie udało się wylogować. Spróbuj ponownie."
   }
 }

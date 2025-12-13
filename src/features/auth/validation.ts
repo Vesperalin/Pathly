@@ -21,6 +21,14 @@ export interface AuthValidationMessages {
   confirmPassword: ConfirmPasswordValidationMessages;
 }
 
+export interface ChangePasswordValidationMessages {
+  currentPassword: {
+    required: string;
+  };
+  newPassword: PasswordValidationMessages;
+  confirmPassword: ConfirmPasswordValidationMessages;
+}
+
 const createEmailSchema = (messages: EmailValidationMessages) =>
   z.string().trim().min(1, { message: messages.required }).email({ message: messages.invalid });
 
@@ -65,22 +73,22 @@ export function createRegisterSchema(messages: AuthValidationMessages) {
 
 export type RegisterFormValues = z.infer<ReturnType<typeof createRegisterSchema>>;
 
-export function createPasswordResetSchema(messages: AuthValidationMessages) {
-  return withPasswordConfirmation(
-    z.object({
-      password: createPasswordSchema(messages.password),
+export function createChangePasswordSchema(messages: ChangePasswordValidationMessages) {
+  return z
+    .object({
+      currentPassword: z.string().min(1, { message: messages.currentPassword.required }),
+      newPassword: createPasswordSchema(messages.newPassword),
       confirmPassword: createConfirmPasswordSchema(messages.confirmPassword),
-    }),
-    messages.confirmPassword.mismatch
-  );
+    })
+    .superRefine((values, ctx) => {
+      if (values.newPassword !== values.confirmPassword) {
+        ctx.addIssue({
+          path: ["confirmPassword"],
+          code: z.ZodIssueCode.custom,
+          message: messages.confirmPassword.mismatch,
+        });
+      }
+    });
 }
 
-export type PasswordResetFormValues = z.infer<ReturnType<typeof createPasswordResetSchema>>;
-
-export function createPasswordResetRequestSchema(messages: AuthValidationMessages) {
-  return z.object({
-    email: createEmailSchema(messages.email),
-  });
-}
-
-export type PasswordResetRequestFormValues = z.infer<ReturnType<typeof createPasswordResetRequestSchema>>;
+export type ChangePasswordFormValues = z.infer<ReturnType<typeof createChangePasswordSchema>>;
