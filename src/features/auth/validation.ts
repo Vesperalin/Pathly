@@ -8,7 +8,6 @@ export interface EmailValidationMessages {
 export interface PasswordValidationMessages {
   required: string;
   minLength: string;
-  weak: string;
 }
 
 export interface ConfirmPasswordValidationMessages {
@@ -37,10 +36,7 @@ const createPasswordSchema = (messages: PasswordValidationMessages) =>
   z
     .string()
     .min(1, { message: messages.required })
-    .min(8, { message: messages.minLength })
-    .refine((password) => /[a-zA-Z]/.test(password) && /[0-9]/.test(password), {
-      message: messages.weak,
-    });
+    .min(8, { message: messages.minLength });
 
 const createConfirmPasswordSchema = (messages: ConfirmPasswordValidationMessages) =>
   z.string().min(1, { message: messages.required });
