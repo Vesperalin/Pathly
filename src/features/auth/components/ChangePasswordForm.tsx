@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { updatePasswordAction } from "@/features/auth/actions";
 import { FieldError, FormErrorMessage } from "@/features/auth/components/FormMessage";
 import {
   createChangePasswordSchema,
@@ -15,13 +16,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-interface ChangePasswordFormProps {
-  onSubmit?: (values: ChangePasswordFormValues) => Promise<void> | void;
-}
-
-const noop = async () => {};
-
-export function ChangePasswordForm({ onSubmit = noop }: ChangePasswordFormProps) {
+export function ChangePasswordForm() {
   const t = useTranslations("settings.security.changePassword");
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -61,15 +56,40 @@ export function ChangePasswordForm({ onSubmit = noop }: ChangePasswordFormProps)
 
   const handleSubmit = form.handleSubmit(async (values) => {
     setFormError(null);
+
     try {
-      await onSubmit(values);
+      const result = await updatePasswordAction(values);
+
+      if (!result.success) {
+        // Handle field-specific errors
+        if (result.fieldErrors) {
+          Object.entries(result.fieldErrors).forEach(([field, message]) => {
+            form.setError(field as keyof ChangePasswordFormValues, {
+              type: "server",
+              message,
+            });
+          });
+          return;
+        }
+
+        // Handle general errors
+        if (result.error) {
+          const errorKey = `errors.${result.error}`;
+          const errorMessage = t.has(errorKey) ? t(errorKey) : t("errors.generic");
+          setFormError(errorMessage);
+          return;
+        }
+
+        setFormError(t("errors.generic"));
+        return;
+      }
+
+      // Success - reset form and show toast
       form.reset();
       toast.success(t("toast.success"));
     } catch (error) {
       console.error("Failed to change password", error);
-      const fallbackMessage = t("errors.generic");
-      const message = error instanceof Error && error.message ? error.message : fallbackMessage;
-      setFormError(message);
+      setFormError(t("errors.generic"));
     }
   });
 

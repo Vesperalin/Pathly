@@ -64,7 +64,11 @@
         "success": "Password updated successfully."
       },
       "errors": {
-        "generic": "We couldn't update the password. Please try again."
+        "generic": "We couldn't update the password. Please try again.",
+        "invalidCurrentPassword": "The current password you entered is incorrect.",
+        "samePassword": "Your new password must be different from your current password.",
+        "weakPassword": "The new password is too weak. Use a stronger password.",
+        "sessionExpired": "Your session has expired. Please sign in again."
       },
       "validation": {
         "currentPassword": {
