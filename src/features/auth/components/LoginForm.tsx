@@ -12,17 +12,24 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
-interface LoginFormProps {
-  onSubmit?: (values: LoginFormValues) => Promise<void> | void;
+interface ActionResult {
+  success: boolean;
+  error?: string;
+  fieldErrors?: Record<string, string>;
 }
 
-const noop = async () => {};
+interface LoginFormProps {
+  onSubmit?: (values: LoginFormValues) => Promise<ActionResult | never>;
+}
+
+const noop = async (): Promise<ActionResult> => ({ success: true });
 
 export function LoginForm({ onSubmit = noop }: LoginFormProps) {
   const t = useTranslations("auth.login");
   const validationMessages = useAuthValidationMessages();
   const scopedPath = useLocaleAwarePath();
   const [formError, setFormError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const schema = useMemo(() => createLoginSchema(validationMessages), [validationMessages]);
 
@@ -41,14 +48,43 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
 
   const handleSubmit = form.handleSubmit(async (values) => {
     setFormError(null);
+    setIsLoading(true);
+
     try {
-      await onSubmit(values);
+      const result = await onSubmit(values);
+
+      // Handle ActionResult from Server Action
+      // Note: successful login will redirect, so this code only runs on error
+      if (!result.success) {
+        // Handle field-specific errors
+        if (result.fieldErrors) {
+          Object.entries(result.fieldErrors).forEach(([field, message]) => {
+            form.setError(field as keyof LoginFormValues, {
+              type: "manual",
+              message,
+            });
+          });
+        }
+
+        // Handle general error with translation
+        if (result.error) {
+          // Check if translation key exists, otherwise use generic
+          const translationKey = `errors.${result.error}`;
+          const errorMessage = t.has(translationKey) ? t(translationKey as "errors.generic") : t("errors.generic");
+          setFormError(errorMessage);
+        }
+      }
     } catch (error) {
+      // Handle unexpected errors (network, etc.)
       const fallbackMessage = t("errors.generic");
       const message = error instanceof Error && error.message ? error.message : fallbackMessage;
       setFormError(message);
+    } finally {
+      setIsLoading(false);
     }
   });
+
+  const loading = isSubmitting || isLoading;
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit} noValidate>
@@ -62,7 +98,7 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
           inputMode="email"
           autoComplete="email"
           placeholder={t("form.fields.email.placeholder")}
-          disabled={isSubmitting}
+          disabled={loading}
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "login-email-error" : undefined}
           {...form.register("email")}
@@ -77,7 +113,7 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
           type="password"
           autoComplete="current-password"
           placeholder={t("form.fields.password.placeholder")}
-          disabled={isSubmitting}
+          disabled={loading}
           aria-invalid={Boolean(errors.password)}
           aria-describedby={errors.password ? "login-password-error" : undefined}
           {...form.register("password")}
@@ -85,8 +121,8 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
         <FieldError id="login-password-error" message={errors.password?.message} />
       </div>
 
-      <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="w-full">
-        {isSubmitting ? t("form.actions.submitting") : t("form.actions.submit")}
+      <Button type="submit" disabled={loading} aria-busy={loading} className="w-full">
+        {loading ? t("form.actions.submitting") : t("form.actions.submit")}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">

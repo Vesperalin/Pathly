@@ -9,9 +9,38 @@ const intlMiddleware = createMiddleware({
   localePrefix: "always",
 });
 
+// Public paths that don't require authentication
+const PUBLIC_PATHS = ["/login", "/register"];
+
+// Helper to extract locale from pathname
+function extractLocale(pathname: string): { locale: string; pathWithoutLocale: string } {
+  const segments = pathname.split("/").filter(Boolean);
+  const firstSegment = segments[0];
+
+  if (SUPPORTED_LOCALES.includes(firstSegment as (typeof SUPPORTED_LOCALES)[number])) {
+    return {
+      locale: firstSegment,
+      pathWithoutLocale: `/${segments.slice(1).join("/")}`,
+    };
+  }
+
+  return {
+    locale: "en",
+    pathWithoutLocale: pathname,
+  };
+}
+
+// Check if path is public
+function isPublicPath(pathWithoutLocale: string): boolean {
+  return PUBLIC_PATHS.some(
+    (publicPath) => pathWithoutLocale === publicPath || pathWithoutLocale.startsWith(`${publicPath}/`)
+  );
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
+  // Handle API routes - refresh session only
   if (pathname.startsWith("/api/")) {
     const response = NextResponse.next({
       request: {
@@ -24,6 +53,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  // Apply next-intl middleware first
   const intlResponse = intlMiddleware(request);
 
   const response =
@@ -34,8 +64,28 @@ export async function middleware(request: NextRequest) {
       },
     });
 
+  // Refresh Supabase session
   const supabase = createMiddlewareClient(request, response);
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Extract locale and path
+  const { locale, pathWithoutLocale } = extractLocale(pathname);
+  const isPublic = isPublicPath(pathWithoutLocale);
+
+  // Redirect logic
+  if (!user && !isPublic) {
+    // User not authenticated, trying to access private route -> redirect to login
+    const loginUrl = new URL(`/${locale}/login`, request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (user && isPublic) {
+    // User authenticated, trying to access public auth pages -> redirect to dashboard
+    const dashboardUrl = new URL(`/${locale}/dashboard`, request.url);
+    return NextResponse.redirect(dashboardUrl);
+  }
 
   return response;
 }

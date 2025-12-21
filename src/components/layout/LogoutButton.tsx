@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface LogoutButtonProps {
@@ -13,6 +13,7 @@ interface LogoutButtonProps {
 export function LogoutButton({ onLogout }: LogoutButtonProps) {
   const t = useTranslations("layout.logout");
   const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const handleLogout = async () => {
     if (!onLogout) {
@@ -21,15 +22,19 @@ export function LogoutButton({ onLogout }: LogoutButtonProps) {
     }
 
     setIsLoading(true);
-    try {
-      await onLogout();
-    } catch (error) {
-      console.error("Failed to logout", error);
-      toast.error(t("error"));
-    } finally {
-      setIsLoading(false);
-    }
+    startTransition(async () => {
+      try {
+        await onLogout();
+      } catch (error) {
+        console.error("Failed to logout", error);
+        toast.error(t("error"));
+      } finally {
+        setIsLoading(false);
+      }
+    });
   };
+
+  const loading = isLoading || isPending;
 
   return (
     <Button
@@ -37,11 +42,11 @@ export function LogoutButton({ onLogout }: LogoutButtonProps) {
       variant="outline"
       className="w-full justify-start gap-2"
       onClick={handleLogout}
-      disabled={isLoading}
-      aria-busy={isLoading}
+      disabled={loading}
+      aria-busy={loading}
     >
       <LogOut className="h-4 w-4" aria-hidden="true" />
-      <span>{isLoading ? t("actions.loggingOut") : t("actions.logout")}</span>
+      <span>{loading ? t("actions.loggingOut") : t("actions.logout")}</span>
     </Button>
   );
 }

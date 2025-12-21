@@ -2,7 +2,6 @@ import { createCatalog, getCatalogs } from "@/features/catalogs/catalog.service"
 import { CreateCatalogCommandSchema, GetCatalogsQuerySchema } from "@/features/catalogs/validation";
 import { handleApiError } from "@/lib/apiErrors";
 import { ValidationError } from "@/lib/errors";
-import { DEFAULT_USER_ID } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
 import type { CreateCatalogCommand, PaginatedCatalogsDto } from "@/types";
 import type { NextRequest } from "next/server";
@@ -11,9 +10,8 @@ import { NextResponse } from "next/server";
 /**
  * GET /api/catalogs
  *
- * Retrieves a paginated list of all catalogs for the user.
+ * Retrieves a paginated list of all catalogs for the authenticated user.
  * Supports filtering by type, sorting, and pagination.
- * Note: Currently uses DEFAULT_USER_ID. Authentication will be implemented later.
  *
  * Query Parameters:
  * - type: 'predefined' | 'user' (optional) - Filter catalogs by type
@@ -28,12 +26,23 @@ import { NextResponse } from "next/server";
  * Response Status Codes:
  * - 200: Catalogs retrieved successfully
  * - 400: Invalid query parameters
+ * - 401: Unauthorized (user not authenticated)
  * - 500: Internal server error
  */
 export async function GET(request: NextRequest) {
   try {
     // Initialize Supabase client
     const supabase = await createClient();
+
+    // Authenticate user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Step 1: Parse and validate query parameters
     const { searchParams } = new URL(request.url);
@@ -54,8 +63,7 @@ export async function GET(request: NextRequest) {
     const validatedParams = validationResult.data;
 
     // Step 2: Fetch catalogs using the service layer
-    // TODO: Replace DEFAULT_USER_ID with actual authenticated user ID once auth is implemented
-    const result: PaginatedCatalogsDto = await getCatalogs(supabase, DEFAULT_USER_ID, validatedParams);
+    const result: PaginatedCatalogsDto = await getCatalogs(supabase, user.id, validatedParams);
 
     // Step 3: Return the paginated response
     return NextResponse.json(result, { status: 200 });
@@ -67,8 +75,7 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/catalogs
  *
- * Creates a new catalog for the user.
- * Note: Currently uses DEFAULT_USER_ID. Authentication will be implemented later.
+ * Creates a new catalog for the authenticated user.
  *
  * @param request - The incoming NextRequest object
  * @returns A NextResponse containing the created catalog or an error message
@@ -76,6 +83,7 @@ export async function GET(request: NextRequest) {
  * Response Status Codes:
  * - 201: Catalog created successfully
  * - 400: Invalid request body or validation failure
+ * - 401: Unauthorized (user not authenticated)
  * - 409: Catalog with the same name already exists for this user
  * - 500: Internal server error
  */
@@ -84,7 +92,17 @@ export async function POST(request: NextRequest) {
     // Initialize Supabase client
     const supabase = await createClient();
 
-    // Step 1: Validate the request body
+    // Authenticate user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Parse and validate request body
     let requestBody: unknown;
     try {
       requestBody = await request.json();
@@ -106,10 +124,9 @@ export async function POST(request: NextRequest) {
 
     const validatedData: CreateCatalogCommand = validationResult.data;
 
-    // Step 2: Create the catalog using the service layer
-    const newCatalog = await createCatalog(supabase, validatedData, DEFAULT_USER_ID);
+    // Create the catalog
+    const newCatalog = await createCatalog(supabase, validatedData, user.id);
 
-    // Step 3: Return the created catalog
     return NextResponse.json(newCatalog, { status: 201 });
   } catch (error) {
     return handleApiError(error);

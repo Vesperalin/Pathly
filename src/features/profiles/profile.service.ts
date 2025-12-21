@@ -40,6 +40,39 @@ export async function getProfile(supabase: SupabaseClient<Database>, userId: str
 }
 
 /**
+ * Creates a new profile for a user.
+ *
+ * @param supabase - Supabase client instance
+ * @param userId - The authenticated user's ID
+ * @returns The created profile DTO
+ * @throws Error for database errors
+ */
+export async function createProfile(supabase: SupabaseClient<Database>, userId: string): Promise<ProfileDto> {
+  const { data: profile, error: dbError } = await supabase
+    .schema("pathly")
+    .from("profiles")
+    .insert({ id: userId })
+    .select("id, language, theme, created_at")
+    .single();
+
+  if (dbError) {
+    console.error("DB error creating profile:", dbError);
+    throw new Error("Failed to create profile");
+  }
+
+  if (!profile) {
+    throw new Error("Profile creation failed: No data returned");
+  }
+
+  return {
+    id: profile.id,
+    language: profile.language,
+    theme: profile.theme,
+    created_at: profile.created_at,
+  };
+}
+
+/**
  * Updates a user's profile information.
  *
  * @param supabase - Supabase client instance

@@ -6,13 +6,22 @@ import {
 } from "@/features/catalogs/validation";
 import { handleApiError } from "@/lib/apiErrors";
 import { NotFoundError, ValidationError } from "@/lib/errors";
-import { DEFAULT_USER_ID } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest, context: { params: Promise<{ catalogId: string }> }) {
   try {
     const supabase = await createClient();
+
+    // Authenticate user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const params = await context.params;
     const paramsValidation = CatalogIdParamSchema.safeParse(params);
@@ -37,7 +46,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ cat
 
     const query = queryValidation.data as GetCatalogRoutesQuery;
 
-    const catalogDetails = await getCatalogDetails(supabase, catalogId, DEFAULT_USER_ID, {
+    const catalogDetails = await getCatalogDetails(supabase, catalogId, user.id, {
       routes_page: query.page,
       routes_page_size: query.page_size,
       routes_sort_by: query.sort_by,
