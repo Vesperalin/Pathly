@@ -48,6 +48,10 @@ function mapAuthError(error: unknown): string {
     return "tooManyRequests";
   }
 
+  if (message.includes("user not found") || message.includes("not registered")) {
+    return "userNotFound";
+  }
+
   return "generic";
 }
 
@@ -65,6 +69,7 @@ export async function loginAction(locale: string, values: LoginFormValues): Prom
     password: {
       required: "Password is required.",
       minLength: "Use at least 8 characters.",
+      weak: "Password must contain letters and numbers.",
     },
     confirmPassword: {
       required: "Please confirm your password.",
@@ -139,6 +144,7 @@ export async function registerAction(locale: string, values: RegisterFormValues)
     password: {
       required: "Password is required.",
       minLength: "Use at least 8 characters.",
+      weak: "Password must contain letters and numbers.",
     },
     confirmPassword: {
       required: "Please confirm your password.",

@@ -33,6 +33,7 @@ export function ChangePasswordForm({ onSubmit = noop }: ChangePasswordFormProps)
       newPassword: {
         required: t("validation.newPassword.required"),
         minLength: t("validation.newPassword.minLength"),
+        weak: t("validation.newPassword.weak"),
       },
       confirmPassword: {
         required: t("validation.confirmPassword.required"),

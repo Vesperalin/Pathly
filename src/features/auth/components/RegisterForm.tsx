@@ -78,6 +78,14 @@ export function RegisterForm({ onSubmit = noop }: RegisterFormProps) {
         }
       }
     } catch (error) {
+      // Next.js redirect() throws a special error - let it propagate
+      if (error && typeof error === "object" && "digest" in error) {
+        const digest = (error as { digest?: string }).digest;
+        if (digest?.startsWith("NEXT_REDIRECT")) {
+          throw error;
+        }
+      }
+
       // Handle unexpected errors (network, etc.)
       const fallbackMessage = t("errors.generic");
       const message = error instanceof Error && error.message ? error.message : fallbackMessage;

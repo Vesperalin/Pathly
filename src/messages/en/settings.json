@@ -72,7 +72,8 @@
         },
         "newPassword": {
           "required": "New password is required.",
-          "minLength": "Use at least 8 characters."
+          "minLength": "Use at least 8 characters.",
+          "weak": "Password must contain letters and numbers."
         },
         "confirmPassword": {
           "required": "Please confirm the new password.",

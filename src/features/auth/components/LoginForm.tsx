@@ -29,6 +29,7 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
   const validationMessages = useAuthValidationMessages();
   const scopedPath = useLocaleAwarePath();
   const [formError, setFormError] = useState<string | null>(null);
+  const [showCreateAccountPrompt, setShowCreateAccountPrompt] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const schema = useMemo(() => createLoginSchema(validationMessages), [validationMessages]);
@@ -48,6 +49,7 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
 
   const handleSubmit = form.handleSubmit(async (values) => {
     setFormError(null);
+    setShowCreateAccountPrompt(false);
     setIsLoading(true);
 
     try {
@@ -72,9 +74,20 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
           const translationKey = `errors.${result.error}`;
           const errorMessage = t.has(translationKey) ? t(translationKey as "errors.generic") : t("errors.generic");
           setFormError(errorMessage);
+
+          // Show create account prompt on any login error (improves UX and follows industry standard)
+          setShowCreateAccountPrompt(true);
         }
       }
     } catch (error) {
+      // Next.js redirect() throws a special error - let it propagate
+      if (error && typeof error === "object" && "digest" in error) {
+        const digest = (error as { digest?: string }).digest;
+        if (digest?.startsWith("NEXT_REDIRECT")) {
+          throw error;
+        }
+      }
+
       // Handle unexpected errors (network, etc.)
       const fallbackMessage = t("errors.generic");
       const message = error instanceof Error && error.message ? error.message : fallbackMessage;
@@ -89,6 +102,15 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
   return (
     <form className="space-y-6" onSubmit={handleSubmit} noValidate>
       <FormErrorMessage message={formError} />
+
+      {showCreateAccountPrompt && (
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+          <p className="mb-2 text-sm font-medium text-foreground">{t("helper.noAccountYet")}</p>
+          <Button asChild variant="outline" size="sm" className="w-full">
+            <Link href={scopedPath("/register")}>{t("helper.createAccountCta")}</Link>
+          </Button>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="login-email">{t("form.fields.email.label")}</Label>

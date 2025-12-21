@@ -25,6 +25,7 @@ export function useAuthValidationMessages(): AuthValidationMessages {
       password: {
         required: validation("password.required"),
         minLength: validation("password.minLength"),
+        weak: validation("password.weak"),
       },
       confirmPassword: {
         required: validation("confirmPassword.required"),

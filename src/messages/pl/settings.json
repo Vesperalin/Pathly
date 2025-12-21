@@ -72,7 +72,8 @@
         },
         "newPassword": {
           "required": "Nowe hasło jest wymagane.",
-          "minLength": "Nowe hasło musi mieć co najmniej 8 znaków."
+          "minLength": "Nowe hasło musi mieć co najmniej 8 znaków.",
+          "weak": "Hasło musi zawierać litery i cyfry."
         },
         "confirmPassword": {
           "required": "Potwierdź nowe hasło.",
