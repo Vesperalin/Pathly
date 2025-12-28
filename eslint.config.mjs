@@ -47,6 +47,7 @@ export default tseslint.config(
       globals: {
         window: true,
         document: true,
+        module: true,
       },
     },
     settings: {
