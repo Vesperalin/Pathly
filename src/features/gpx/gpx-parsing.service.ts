@@ -1,5 +1,5 @@
 import type { GpxParseResultDto } from "@/types";
-import gpxParser from "gpxparser";
+import { XMLParser } from "fast-xml-parser";
 
 /**
  * Configuration for elevation calculation
@@ -12,10 +12,54 @@ const ELEVATION_CONFIG = {
 };
 
 /**
+ * GPX Point interface
+ */
+interface GpxPoint {
+  "@_lat": string;
+  "@_lon": string;
+  ele?: string | number;
+  time?: string;
+}
+
+/**
+ * GPX Track Segment interface
+ */
+interface GpxTrackSegment {
+  trkpt?: GpxPoint | GpxPoint[];
+}
+
+/**
+ * GPX Track interface
+ */
+interface GpxTrack {
+  trkseg?: GpxTrackSegment | GpxTrackSegment[];
+}
+
+/**
+ * GPX Root interface
+ */
+interface GpxRoot {
+  gpx?: {
+    trk?: GpxTrack | GpxTrack[];
+  };
+}
+
+/**
  * Service for parsing and aggregating GPX file data.
  * Extracts route metrics from one or more GPX files and returns aggregated results.
  */
 export class GpxParsingService {
+  private parser: XMLParser;
+
+  constructor() {
+    this.parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: "@_",
+      parseAttributeValue: true,
+      trimValues: true,
+    });
+  }
+
   /**
    * Parses multiple GPX files and aggregates their data.
    *
@@ -45,12 +89,18 @@ export class GpxParsingService {
       // Read file content as text
       const fileContent = await file.text();
 
-      // Parse GPX content
-      const gpx = new gpxParser();
-      gpx.parse(fileContent);
+      // Parse GPX XML content
+      const parsed: GpxRoot = this.parser.parse(fileContent);
 
-      // Validate that GPX has tracks with points
-      if (!gpx.tracks || gpx.tracks.length === 0) {
+      // Validate that GPX has tracks
+      if (!parsed.gpx?.trk) {
+        throw new Error(`File ${file.name} contains no tracks`);
+      }
+
+      // Normalize tracks to array
+      const tracks = Array.isArray(parsed.gpx.trk) ? parsed.gpx.trk : [parsed.gpx.trk];
+
+      if (tracks.length === 0) {
         throw new Error(`File ${file.name} contains no tracks`);
       }
 
@@ -64,38 +114,68 @@ export class GpxParsingService {
 
       // Collect all elevation points for custom calculation
       const allElevationPoints: number[] = [];
+      const allPoints: { lat: number; lon: number; ele?: number; time?: Date }[] = [];
 
-      for (const track of gpx.tracks) {
-        // Accumulate distance (convert from km to meters if needed)
-        if (track.distance?.total) {
-          totalDistance += track.distance.total;
-        }
+      for (const track of tracks) {
+        // Normalize track segments to array
+        const segments = track.trkseg ? (Array.isArray(track.trkseg) ? track.trkseg : [track.trkseg]) : [];
 
-        // Collect elevation data from track points for custom calculation
-        for (const point of track.points || []) {
-          // Collect elevation data
-          if (point.ele !== undefined && point.ele !== null) {
-            allElevationPoints.push(point.ele);
+        for (const segment of segments) {
+          if (!segment.trkpt) {
+            continue;
           }
 
-          // Extract dates from track points
-          if (point.time) {
-            const pointDate = new Date(point.time);
+          // Normalize points to array
+          const points = Array.isArray(segment.trkpt) ? segment.trkpt : [segment.trkpt];
 
-            if (!earliestDate || pointDate < earliestDate) {
-              earliestDate = pointDate;
+          for (const point of points) {
+            const lat = parseFloat(point["@_lat"]);
+            const lon = parseFloat(point["@_lon"]);
+
+            if (isNaN(lat) || isNaN(lon)) {
+              continue;
             }
 
-            if (!startTime || pointDate < startTime) {
-              startTime = pointDate;
+            // Extract elevation
+            let elevation: number | undefined;
+            if (point.ele !== undefined && point.ele !== null) {
+              elevation = typeof point.ele === "string" ? parseFloat(point.ele) : point.ele;
+              if (!isNaN(elevation)) {
+                allElevationPoints.push(elevation);
+              }
             }
 
-            if (!endTime || pointDate > endTime) {
-              endTime = pointDate;
+            // Extract time
+            let pointDate: Date | undefined;
+            if (point.time) {
+              pointDate = new Date(point.time);
+              if (!isNaN(pointDate.getTime())) {
+                if (!earliestDate || pointDate < earliestDate) {
+                  earliestDate = pointDate;
+                }
+
+                if (!startTime || pointDate < startTime) {
+                  startTime = pointDate;
+                }
+
+                if (!endTime || pointDate > endTime) {
+                  endTime = pointDate;
+                }
+              }
             }
+
+            allPoints.push({
+              lat,
+              lon,
+              ele: elevation,
+              time: pointDate,
+            });
           }
         }
       }
+
+      // Calculate distance using Haversine formula
+      totalDistance = this.calculateTotalDistance(allPoints);
 
       // Calculate elevation with smoothing and threshold
       const elevationData = this.calculateElevationGain(allElevationPoints);
@@ -125,6 +205,64 @@ export class GpxParsingService {
       const errorMessage = error instanceof Error ? error.message : "Unknown parsing error";
       throw new Error(`Failed to parse file ${file.name}: ${errorMessage}`);
     }
+  }
+
+  /**
+   * Calculates total distance using Haversine formula.
+   * Distance is calculated in meters.
+   *
+   * @param points - Array of GPS points with lat/lon coordinates
+   * @returns Total distance in meters
+   */
+  private calculateTotalDistance(points: { lat: number; lon: number }[]): number {
+    if (points.length < 2) {
+      return 0;
+    }
+
+    let totalDistance = 0;
+
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1];
+      const curr = points[i];
+
+      const distance = this.haversineDistance(prev.lat, prev.lon, curr.lat, curr.lon);
+      totalDistance += distance;
+    }
+
+    return totalDistance;
+  }
+
+  /**
+   * Calculates the distance between two points on Earth using the Haversine formula.
+   * Returns distance in meters.
+   *
+   * @param lat1 - Latitude of first point in degrees
+   * @param lon1 - Longitude of first point in degrees
+   * @param lat2 - Latitude of second point in degrees
+   * @param lon2 - Longitude of second point in degrees
+   * @returns Distance in meters
+   */
+  private haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371000; // Earth's radius in meters
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLon = this.toRadians(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  /**
+   * Converts degrees to radians.
+   *
+   * @param degrees - Angle in degrees
+   * @returns Angle in radians
+   */
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
   }
 
   /**

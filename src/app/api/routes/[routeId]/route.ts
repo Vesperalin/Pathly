@@ -2,18 +2,16 @@ import { getRouteDetails, updateRoute } from "@/features/routes/route.service";
 import { RouteIdParamSchema, UpdateRouteCommandSchema } from "@/features/routes/validation";
 import { handleApiError } from "@/lib/apiErrors";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
-import { DEFAULT_USER_ID } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 /**
  * DELETE /api/routes/{routeId}
  *
- * Permanently deletes a route owned by the user.
+ * Permanently deletes a route owned by the authenticated user.
  * The operation is idempotent - deleting a non-existent route returns 404.
  * Related records in route_catalogs and route_mountain_groups are automatically
  * deleted via ON DELETE CASCADE constraints.
- * Note: Currently uses DEFAULT_USER_ID. Authentication will be implemented later.
  *
  * Path Parameters:
  * - routeId: UUID - The unique identifier of the route to delete
@@ -25,6 +23,7 @@ import { NextResponse } from "next/server";
  * Response Status Codes:
  * - 204: Route successfully deleted
  * - 400: Invalid routeId format (not a valid UUID)
+ * - 401: Unauthorized (user not authenticated)
  * - 403: User does not own the route
  * - 404: Route not found
  * - 500: Internal server error
@@ -34,7 +33,17 @@ export async function DELETE(_request: Request, context: { params: Promise<{ rou
     // Step 1: Initialize Supabase server client
     const supabase = await createClient();
 
-    // Step 2: Validate routeId parameter
+    // Step 2: Authenticate user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Step 3: Validate routeId parameter
     const params = await context.params;
     const validationResult = RouteIdParamSchema.safeParse({ routeId: params.routeId });
 
@@ -44,8 +53,7 @@ export async function DELETE(_request: Request, context: { params: Promise<{ rou
 
     const { routeId } = validationResult.data;
 
-    // Step 3: Fetch route to verify existence and ownership
-    // TODO: Replace DEFAULT_USER_ID with actual authenticated user ID once auth is implemented
+    // Step 4: Fetch route to verify existence and ownership
     const { data: route, error: fetchError } = await supabase
       .schema("pathly")
       .from("routes")
@@ -71,12 +79,12 @@ export async function DELETE(_request: Request, context: { params: Promise<{ rou
       throw new NotFoundError("Route not found.");
     }
 
-    // Step 4: Verify ownership - user must own the route to delete it
-    if (route.user_id !== DEFAULT_USER_ID) {
+    // Step 5: Verify ownership - user must own the route to delete it
+    if (route.user_id !== user.id) {
       throw new ForbiddenError("You do not have permission to delete this route.");
     }
 
-    // Step 5: Execute deletion
+    // Step 6: Execute deletion
     // ON DELETE CASCADE will automatically remove related records
     const { error: deleteError } = await supabase.schema("pathly").from("routes").delete().eq("id", routeId);
 
@@ -87,7 +95,7 @@ export async function DELETE(_request: Request, context: { params: Promise<{ rou
       throw new Error(deleteError.message);
     }
 
-    // Step 6: Return success response with 204 No Content
+    // Step 7: Return success response with 204 No Content
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     return handleApiError(error);
@@ -97,9 +105,8 @@ export async function DELETE(_request: Request, context: { params: Promise<{ rou
 /**
  * GET /api/routes/[routeId]
  *
- * Retrieves detailed information about a specific route, including its associated
- * mountain groups and catalogs.
- * Note: Currently uses DEFAULT_USER_ID. Authentication will be implemented later.
+ * Retrieves detailed information about a specific route owned by the authenticated user,
+ * including its associated mountain groups and catalogs.
  *
  * Path Parameters:
  * - routeId: string (UUID) - The unique identifier of the route
@@ -111,12 +118,26 @@ export async function DELETE(_request: Request, context: { params: Promise<{ rou
  * Response Status Codes:
  * - 200: Route retrieved successfully
  * - 400: Invalid route ID format (not a valid UUID)
+ * - 401: Unauthorized (user not authenticated)
  * - 404: Route not found or does not belong to the user
  * - 500: Internal server error
  */
 export async function GET(_request: Request, context: { params: Promise<{ routeId: string }> }) {
   try {
-    // Step 1 & 2: Extract and validate routeId parameter
+    // Step 1: Initialize Supabase server client
+    const supabase = await createClient();
+
+    // Step 2: Authenticate user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Step 3: Extract and validate routeId parameter
     const params = await context.params;
     const validationResult = RouteIdParamSchema.safeParse(params);
 
@@ -126,12 +147,8 @@ export async function GET(_request: Request, context: { params: Promise<{ routeI
 
     const { routeId } = validationResult.data;
 
-    // Step 3: Initialize Supabase server client
-    const supabase = await createClient();
-
     // Step 4: Fetch route details using the service layer
-    // TODO: Replace DEFAULT_USER_ID with actual authenticated user ID once auth is implemented
-    const route = await getRouteDetails(supabase, routeId, DEFAULT_USER_ID);
+    const route = await getRouteDetails(supabase, routeId, user.id);
 
     // Step 5: Handle not found case
     if (!route) {
@@ -148,9 +165,8 @@ export async function GET(_request: Request, context: { params: Promise<{ routeI
 /**
  * PATCH /api/routes/[routeId]
  *
- * Updates an existing route's details and associations.
+ * Updates an existing route's details and associations for the authenticated user.
  * Allows partial updates of user-editable fields. GPX-derived data cannot be modified.
- * Note: Currently uses DEFAULT_USER_ID. Authentication will be implemented later.
  *
  * Path Parameters:
  * - routeId: string (UUID) - The unique identifier of the route to update
@@ -178,7 +194,20 @@ export async function GET(_request: Request, context: { params: Promise<{ routeI
  */
 export async function PATCH(request: Request, context: { params: Promise<{ routeId: string }> }) {
   try {
-    // Step 1: Extract and validate routeId parameter
+    // Step 1: Initialize Supabase server client
+    const supabase = await createClient();
+
+    // Step 2: Authenticate user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Step 3: Extract and validate routeId parameter
     const params = await context.params;
     const paramValidation = RouteIdParamSchema.safeParse(params);
 
@@ -188,7 +217,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ route
 
     const { routeId } = paramValidation.data;
 
-    // Step 2: Parse and validate request body
+    // Step 4: Parse and validate request body
     let requestBody;
     try {
       requestBody = await request.json();
@@ -210,14 +239,10 @@ export async function PATCH(request: Request, context: { params: Promise<{ route
 
     const validatedCommand = bodyValidation.data;
 
-    // Step 3: Initialize Supabase server client
-    const supabase = await createClient();
+    // Step 5: Call the service layer to update the route
+    const updatedRoute = await updateRoute(supabase, routeId, validatedCommand, user.id);
 
-    // Step 4: Call the service layer to update the route
-    // TODO: Replace DEFAULT_USER_ID with actual authenticated user ID once auth is implemented
-    const updatedRoute = await updateRoute(supabase, routeId, validatedCommand, DEFAULT_USER_ID);
-
-    // Step 5: Return the updated route details
+    // Step 6: Return the updated route details
     return NextResponse.json(updatedRoute, { status: 200 });
   } catch (error) {
     return handleApiError(error);

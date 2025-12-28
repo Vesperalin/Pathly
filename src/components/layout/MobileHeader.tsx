@@ -13,9 +13,10 @@ import { SidebarContent } from "./Sidebar";
 
 interface MobileHeaderProps {
   breadcrumbsSlot?: ReactNode;
+  onLogout?: () => Promise<void> | void;
 }
 
-export function MobileHeader({ breadcrumbsSlot }: MobileHeaderProps) {
+export function MobileHeader({ breadcrumbsSlot, onLogout }: MobileHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const translation = useTranslations("layout.mobileHeader");
   const { items } = useBreadcrumbs();
@@ -40,7 +41,7 @@ export function MobileHeader({ breadcrumbsSlot }: MobileHeaderProps) {
           <VisuallyHidden>
             <DialogDescription>{translation("menuDescription")}</DialogDescription>
           </VisuallyHidden>
-          <SidebarContent onNavigate={() => setIsOpen(false)} />
+          <SidebarContent onNavigate={() => setIsOpen(false)} onLogout={onLogout} />
         </DialogContent>
       </Dialog>
       <div className="flex flex-1 items-center justify-center truncate">{headerContent}</div>

@@ -2,7 +2,6 @@ import { getProfile, updateProfile } from "@/features/profiles/profile.service";
 import { UpdateProfileCommandSchema } from "@/features/profiles/validation";
 import { handleApiError } from "@/lib/apiErrors";
 import { NotFoundError, ValidationError } from "@/lib/errors";
-import { DEFAULT_USER_ID } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,10 +9,10 @@ import { NextRequest, NextResponse } from "next/server";
  * GET /api/profiles/me
  *
  * Retrieves the profile information of the currently authenticated user.
- * Note: Authentication is temporarily disabled. Using DEFAULT_USER_ID.
  *
  * @returns {ProfileDto} User's profile data including id, language, theme, and created_at
  *
+ * @throws {401} If the user is not authenticated
  * @throws {404} If the user's profile does not exist
  * @throws {500} If an internal server error occurs
  */
@@ -22,8 +21,18 @@ export async function GET() {
     // Initialize Supabase server client
     const supabase = await createClient();
 
+    // Authenticate user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Get the profile using the service layer
-    const profile = await getProfile(supabase, DEFAULT_USER_ID);
+    const profile = await getProfile(supabase, user.id);
 
     // Handle profile not found
     if (!profile) {
@@ -42,13 +51,12 @@ export async function GET() {
  *
  * Updates the profile information of the currently authenticated user.
  * Only the fields provided in the request body will be updated.
- * Note: Authentication is temporarily disabled. Using DEFAULT_USER_ID.
  *
  * @param {NextRequest} request - The incoming request containing the profile update data
  * @returns {ProfileDto} Updated user's profile data including id, language, theme, and created_at
  *
  * @throws {400} If the request body is invalid or fails validation
- * @throws {401} If the user is not authenticated (when auth is enabled)
+ * @throws {401} If the user is not authenticated
  * @throws {404} If the user's profile does not exist
  * @throws {500} If an internal server error occurs
  */
@@ -56,6 +64,16 @@ export async function PATCH(request: NextRequest) {
   try {
     // Initialize Supabase server client
     const supabase = await createClient();
+
+    // Authenticate user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Parse the request body
     let requestBody;
@@ -80,7 +98,7 @@ export async function PATCH(request: NextRequest) {
     const validatedData = validation.data;
 
     // Update the profile using the service layer
-    const updatedProfile = await updateProfile(supabase, DEFAULT_USER_ID, validatedData);
+    const updatedProfile = await updateProfile(supabase, user.id, validatedData);
 
     // Return the updated profile data
     return NextResponse.json(updatedProfile, { status: 200 });

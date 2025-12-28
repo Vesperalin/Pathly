@@ -35,8 +35,56 @@
   },
   "security": {
     "title": "Bezpieczeństwo",
-    "description": "Opcje bezpieczeństwa pojawią się wraz z logowaniem.",
-    "placeholder": "Ustawienia bezpieczeństwa będą dostępne po włączeniu uwierzytelniania."
+    "description": "Zarządzaj dostępem do swojego konta Pathly.",
+    "changePassword": {
+      "title": "Zmień hasło",
+      "description": "Wpisz bieżące hasło i ustaw nowe, aby zadbać o bezpieczeństwo konta.",
+      "form": {
+        "fields": {
+          "currentPassword": {
+            "label": "Aktualne hasło",
+            "placeholder": "Wpisz aktualne hasło"
+          },
+          "newPassword": {
+            "label": "Nowe hasło",
+            "placeholder": "Minimum 8 znaków"
+          },
+          "confirmPassword": {
+            "label": "Potwierdź nowe hasło",
+            "placeholder": "Powtórz nowe hasło"
+          }
+        },
+        "helper": "Po zmianie hasła zostaniesz poproszona/-y o ponowne zalogowanie.",
+        "actions": {
+          "submit": "Zapisz nowe hasło",
+          "submitting": "Zapisywanie…"
+        }
+      },
+      "toast": {
+        "success": "Hasło zostało zaktualizowane."
+      },
+      "errors": {
+        "generic": "Nie udało się zaktualizować hasła. Spróbuj ponownie.",
+        "invalidCurrentPassword": "Podane aktualne hasło jest nieprawidłowe.",
+        "samePassword": "Nowe hasło musi różnić się od obecnego.",
+        "weakPassword": "Nowe hasło jest zbyt słabe. Użyj silniejszego hasła.",
+        "sessionExpired": "Twoja sesja wygasła. Zaloguj się ponownie."
+      },
+      "validation": {
+        "currentPassword": {
+          "required": "Podaj aktualne hasło."
+        },
+        "newPassword": {
+          "required": "Nowe hasło jest wymagane.",
+          "minLength": "Nowe hasło musi mieć co najmniej 8 znaków.",
+          "weak": "Hasło musi zawierać litery i cyfry."
+        },
+        "confirmPassword": {
+          "required": "Potwierdź nowe hasło.",
+          "mismatch": "Hasła muszą być identyczne."
+        }
+      }
+    }
   },
   "toast": {
     "revert": "Zmiany zostały cofnięte."

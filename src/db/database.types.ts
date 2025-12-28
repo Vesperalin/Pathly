@@ -267,6 +267,25 @@ export interface Database {
           updated_at: string;
         }[];
       };
+      update_route_with_associations: {
+        Args: {
+          p_catalog_ids?: string[];
+          p_got_points?: number;
+          p_mountain_group_ids?: string[];
+          p_name?: string;
+          p_notes?: string;
+          p_route_date?: string;
+          p_route_id: string;
+          p_update_catalog_ids?: boolean;
+          p_update_got_points?: boolean;
+          p_update_mountain_group_ids?: boolean;
+          p_update_name?: boolean;
+          p_update_notes?: boolean;
+          p_update_route_date?: boolean;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       analytics_event_type_enum: "account_created" | "route_added" | "catalog_created" | "route_assigned_to_catalog";

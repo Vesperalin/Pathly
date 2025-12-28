@@ -17,5 +17,13 @@
     "openSideNavigation": "Open navigation",
     "closeSideNavigation": "Close navigation",
     "menuDescription": "Primary navigation links"
+  },
+  "logout": {
+    "actions": {
+      "logout": "Sign out",
+      "loggingOut": "Signing out…"
+    },
+    "placeholder": "Sign out will be available once authentication is enabled.",
+    "error": "We couldn't sign you out. Please try again."
   }
 }

@@ -35,8 +35,56 @@
   },
   "security": {
     "title": "Security",
-    "description": "Account security options will arrive with sign-in.",
-    "placeholder": "Security settings will become available once authentication is enabled."
+    "description": "Manage access to your Pathly account.",
+    "changePassword": {
+      "title": "Change password",
+      "description": "Enter your current password and set a new one to keep your account secure.",
+      "form": {
+        "fields": {
+          "currentPassword": {
+            "label": "Current password",
+            "placeholder": "Enter current password"
+          },
+          "newPassword": {
+            "label": "New password",
+            "placeholder": "At least 8 characters"
+          },
+          "confirmPassword": {
+            "label": "Confirm new password",
+            "placeholder": "Re-enter new password"
+          }
+        },
+        "helper": "After saving the new password you may be asked to sign in again.",
+        "actions": {
+          "submit": "Save new password",
+          "submitting": "Saving…"
+        }
+      },
+      "toast": {
+        "success": "Password updated successfully."
+      },
+      "errors": {
+        "generic": "We couldn't update the password. Please try again.",
+        "invalidCurrentPassword": "The current password you entered is incorrect.",
+        "samePassword": "Your new password must be different from your current password.",
+        "weakPassword": "The new password is too weak. Use a stronger password.",
+        "sessionExpired": "Your session has expired. Please sign in again."
+      },
+      "validation": {
+        "currentPassword": {
+          "required": "Enter your current password."
+        },
+        "newPassword": {
+          "required": "New password is required.",
+          "minLength": "Use at least 8 characters.",
+          "weak": "Password must contain letters and numbers."
+        },
+        "confirmPassword": {
+          "required": "Please confirm the new password.",
+          "mismatch": "Passwords must match."
+        }
+      }
+    }
   },
   "toast": {
     "revert": "Changes were reverted."

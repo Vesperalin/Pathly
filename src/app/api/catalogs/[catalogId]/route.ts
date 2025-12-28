@@ -6,7 +6,6 @@ import {
 } from "@/features/catalogs/validation";
 import { handleApiError } from "@/lib/apiErrors";
 import { NotFoundError, ValidationError } from "@/lib/errors";
-import { DEFAULT_USER_ID } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -42,6 +41,16 @@ export async function GET(request: NextRequest, context: { params: Promise<{ cat
     // Initialize Supabase client
     const supabase = await createClient();
 
+    // Authenticate user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Step 1: Validate catalogId from path parameter
     const params = await context.params;
     const paramsValidation = CatalogIdParamSchema.safeParse(params);
@@ -70,7 +79,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ cat
     const validatedQuery = queryValidation.data;
 
     // Step 3: Fetch catalog details using the service layer
-    const result = await getCatalogDetails(supabase, catalogId, DEFAULT_USER_ID, validatedQuery);
+    const result = await getCatalogDetails(supabase, catalogId, user.id, validatedQuery);
 
     // Handle catalog not found or permission denied
     if (!result) {
@@ -88,7 +97,6 @@ export async function GET(request: NextRequest, context: { params: Promise<{ cat
  * PATCH /api/catalogs/{catalogId}
  *
  * Updates the name of a specific user-created catalog.
- * Note: Currently uses DEFAULT_USER_ID. Authentication will be implemented later.
  *
  * @param request - The incoming Next.js request object
  * @param context - Contains the dynamic route parameters
@@ -108,7 +116,17 @@ export async function PATCH(
     // Step 1: Initialize Supabase client
     const supabase = await createClient();
 
-    // Step 2: Validate URL parameters
+    // Step 2: Authenticate user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Step 3: Validate URL parameters
     const params = await context.params;
     const paramsValidation = CatalogIdParamSchema.safeParse(params);
 
@@ -118,7 +136,7 @@ export async function PATCH(
 
     const { catalogId } = paramsValidation.data;
 
-    // Step 3: Validate request body
+    // Step 4: Validate request body
     let requestBody;
     try {
       requestBody = await request.json();
@@ -140,10 +158,10 @@ export async function PATCH(
 
     const validatedData = bodyValidation.data;
 
-    // Step 4: Update the catalog using the service layer
-    const updatedCatalog = await updateCatalog(supabase, catalogId, validatedData, DEFAULT_USER_ID);
+    // Step 5: Update the catalog using the service layer
+    const updatedCatalog = await updateCatalog(supabase, catalogId, validatedData, user.id);
 
-    // Step 5: Return the updated catalog
+    // Step 6: Return the updated catalog
     return NextResponse.json(updatedCatalog, { status: 200 });
   } catch (error) {
     return handleApiError(error);
@@ -156,7 +174,6 @@ export async function PATCH(
  * Deletes a specific user-created catalog.
  * Predefined catalogs cannot be deleted.
  * Deleting a catalog does not delete the routes associated with it.
- * Note: Currently uses DEFAULT_USER_ID. Authentication will be implemented later.
  *
  * @param request - The incoming Next.js request object
  * @param context - Contains the dynamic route parameters
@@ -176,7 +193,17 @@ export async function DELETE(
     // Step 1: Initialize Supabase client
     const supabase = await createClient();
 
-    // Step 2: Validate URL parameters
+    // Step 2: Authenticate user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Step 3: Validate URL parameters
     const params = await context.params;
     const paramsValidation = CatalogIdParamSchema.safeParse(params);
 
@@ -186,16 +213,8 @@ export async function DELETE(
 
     const { catalogId } = paramsValidation.data;
 
-    // Step 3: Authenticate user
-    // TODO: Replace DEFAULT_USER_ID with actual authenticated user ID once auth is implemented
-    // For now, we use the DEFAULT_USER_ID constant
-    // In the future, this will be:
-    // const { data: { user }, error: authError } = await supabase.auth.getUser();
-    // if (authError || !user) {
-    //   return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-    // }
     // Step 4: Delete the catalog using the service layer
-    await deleteCatalog(supabase, catalogId, DEFAULT_USER_ID);
+    await deleteCatalog(supabase, catalogId, user.id);
 
     // Step 5: Return success response with 204 No Content
     return new NextResponse(null, { status: 204 });
