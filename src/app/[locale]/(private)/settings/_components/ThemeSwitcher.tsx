@@ -24,7 +24,12 @@ export function ThemeSwitcher({ currentValue, disabled = false, onSelect }: Them
   );
 
   return (
-    <section aria-labelledby="theme-preferences" className="space-y-4">
+    <section
+      aria-labelledby="theme-preferences"
+      className="space-y-4"
+      data-testid="theme-switcher"
+      data-current-theme={currentValue}
+    >
       <div>
         <h3 id="theme-preferences" className="text-sm font-medium leading-none">
           {translation("label")}
@@ -50,6 +55,7 @@ export function ThemeSwitcher({ currentValue, disabled = false, onSelect }: Them
                   void result;
                 }
               }}
+              data-testid={`theme-option-${option.value}`}
             >
               {option.label}
             </Button>

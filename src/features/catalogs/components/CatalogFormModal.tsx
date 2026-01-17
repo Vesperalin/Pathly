@@ -114,11 +114,11 @@ export function CatalogFormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" data-testid="catalog-form-modal">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
-        <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)} noValidate>
+        <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)} noValidate data-testid="catalog-form">
           <div className="space-y-2">
             <Label htmlFor="catalog-name">{texts.labelName}</Label>
             <Input
@@ -126,6 +126,7 @@ export function CatalogFormModal({
               disabled={isSubmitting}
               aria-invalid={Boolean(nameError)}
               aria-describedby={nameError ? "catalog-name-error" : undefined}
+              data-testid="catalog-name-input"
               {...form.register("name")}
             />
             {nameError ? (
@@ -135,7 +136,7 @@ export function CatalogFormModal({
             ) : null}
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} data-testid="catalog-form-submit">
               {submitLabel}
             </Button>
           </DialogFooter>

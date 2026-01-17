@@ -740,7 +740,7 @@ export default function RouteForm({
   const notesFieldId = "route-notes";
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+    <form className="space-y-6" onSubmit={handleSubmit} noValidate data-testid="route-form">
       {showFileUpload && onParseGpx ? (
         <Card>
           <CardHeader>
@@ -784,6 +784,7 @@ export default function RouteForm({
               size="sm"
               onClick={clearGpxValues}
               disabled={!hasGpxValues || isParsingGpx || isSubmitting}
+              data-testid="route-gpx-clear"
             >
               {texts.sections.gpxData.actions.clear}
             </Button>
@@ -808,6 +809,7 @@ export default function RouteForm({
                 disabled={isSubmitting}
                 aria-invalid={Boolean(errors.distance)}
                 aria-describedby={errors.distance ? "distance-error" : undefined}
+                data-testid="route-distance"
                 {...form.register("distance")}
               />
               <FieldError id="distance-error" message={errors.distance?.message} />
@@ -821,6 +823,7 @@ export default function RouteForm({
                 disabled={isSubmitting}
                 aria-invalid={Boolean(errors.total_ascent)}
                 aria-describedby={errors.total_ascent ? "total-ascent-error" : undefined}
+                data-testid="route-total-ascent"
                 {...form.register("total_ascent")}
               />
               <FieldError id="total-ascent-error" message={errors.total_ascent?.message} />
@@ -834,6 +837,7 @@ export default function RouteForm({
                 disabled={isSubmitting}
                 aria-invalid={Boolean(errors.total_descent)}
                 aria-describedby={errors.total_descent ? "total-descent-error" : undefined}
+                data-testid="route-total-descent"
                 {...form.register("total_descent")}
               />
               <FieldError id="total-descent-error" message={errors.total_descent?.message} />
@@ -846,6 +850,7 @@ export default function RouteForm({
                 disabled={isSubmitting}
                 aria-invalid={Boolean(errors.duration)}
                 aria-describedby={errors.duration ? "duration-error" : undefined}
+                data-testid="route-duration"
                 {...form.register("duration")}
               />
               <FieldError id="duration-error" message={errors.duration?.message} />
@@ -869,6 +874,7 @@ export default function RouteForm({
                 disabled={isSubmitting}
                 aria-invalid={Boolean(errors.name)}
                 aria-describedby={errors.name ? "name-error" : undefined}
+                data-testid="route-name"
                 {...form.register("name")}
               />
               <FieldError id="name-error" message={errors.name?.message} />
@@ -881,6 +887,7 @@ export default function RouteForm({
                 disabled={isSubmitting}
                 aria-invalid={Boolean(errors.route_date)}
                 aria-describedby={errors.route_date ? "route-date-error" : undefined}
+                data-testid="route-date"
                 {...form.register("route_date")}
               />
               <FieldError id="route-date-error" message={errors.route_date?.message} />
@@ -894,6 +901,7 @@ export default function RouteForm({
                 disabled={isSubmitting}
                 aria-invalid={Boolean(errors.got_points)}
                 aria-describedby={errors.got_points ? "got-points-error" : undefined}
+                data-testid="route-got-points"
                 {...form.register("got_points")}
               />
               <FieldError id="got-points-error" message={errors.got_points?.message} />
@@ -908,6 +916,7 @@ export default function RouteForm({
                 aria-describedby={errors.notes ? "notes-error" : undefined}
                 className="min-h-[96px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm leading-relaxed ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 placeholder={texts.form.fields.notes.placeholder}
+                data-testid="route-notes"
                 {...form.register("notes")}
               />
               <FieldError id="notes-error" message={errors.notes?.message} />
@@ -946,6 +955,8 @@ export default function RouteForm({
                         "h-auto w-full justify-between gap-2 whitespace-normal py-3 text-left",
                         isSelected && "border-primary bg-primary/10 text-primary"
                       )}
+                      data-testid="route-catalog-chip"
+                      data-catalog-id={catalog.id}
                     >
                       <span className="truncate">{catalog.name}</span>
                       {catalog.is_predefined ? (
@@ -985,6 +996,8 @@ export default function RouteForm({
                         "h-auto w-full justify-between gap-2 whitespace-normal py-3 text-left",
                         isSelected && "border-primary bg-primary/10 text-primary"
                       )}
+                      data-testid="route-mountain-group-chip"
+                      data-mountain-group-id={group.id}
                     >
                       <span className="truncate">{group.name}</span>
                     </Button>
@@ -998,7 +1011,7 @@ export default function RouteForm({
       </Card>
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} data-testid="route-form-submit">
           {isSubmitting ? texts.form.actions.submitting : texts.form.actions.submit}
         </Button>
       </div>

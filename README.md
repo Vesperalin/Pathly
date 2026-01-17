@@ -28,11 +28,12 @@ Pathly is designed for both modern, tech-savvy tourists and experienced badge co
 
 The project is built with a modern, full-stack TypeScript architecture.
 
-| Category            | Technologies                                                                                                                                                                                        |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Frontend**        | [Next.js](https://nextjs.org/) 15, [React](https://react.dev/) 19, [TypeScript](https://www.typescriptlang.org/) 5, [Tailwind CSS](https://tailwindcss.com/) 4, [Shadcn/ui](https://ui.shadcn.com/) |
-| **Backend (BaaS)**  | [Supabase](https://supabase.com/) (PostgreSQL, Authentication, Auto-generated APIs)                                                                                                                 |
-| **CI/CD & Hosting** | [GitHub Actions](https://github.com/features/actions), [Vercel](https://vercel.com/)                                                                                                                |
+| Category            | Technologies                                                                                                                                                                                                                                                                                                                                          |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Frontend**        | [Next.js](https://nextjs.org/) 15, [React](https://react.dev/) 19, [TypeScript](https://www.typescriptlang.org/) 5, [Tailwind CSS](https://tailwindcss.com/) 4, [Shadcn/ui](https://ui.shadcn.com/)                                                                                                                                                   |
+| **Backend (BaaS)**  | [Supabase](https://supabase.com/) (PostgreSQL, Authentication, Auto-generated APIs)                                                                                                                                                                                                                                                                   |
+| **Testing**         | [Vitest](https://vitest.dev/) (unit & integration tests), [React Testing Library](https://testing-library.com/react), [@testing-library/jest-dom](https://testing-library.com/docs/ecosystem-jest-dom/), [Playwright](https://playwright.dev/) (E2E tests), [@axe-core/playwright](https://github.com/dequelabs/axe-core-npm) (accessibility testing) |
+| **CI/CD & Hosting** | [Vercel](https://vercel.com/) (to be configured)                                                                                                                                                                                                                                                                                                      |
 
 ## Getting Started Locally
 
@@ -78,11 +79,19 @@ The application should now be running at [http://localhost:3000](http://localhos
 
 The following scripts are available in the `package.json`:
 
+### Development & Build
+
+| Script  | Description                                   |
+| ------- | --------------------------------------------- |
+| `dev`   | Starts the development server with Turbopack. |
+| `build` | Builds the application for production.        |
+| `start` | Starts the production server.                 |
+| `clean` | Removes the `.next` build directory.          |
+
+### Code Quality
+
 | Script       | Description                                            |
 | ------------ | ------------------------------------------------------ |
-| `dev`        | Starts the development server with Turbopack.          |
-| `build`      | Builds the application for production.                 |
-| `start`      | Starts the production server.                          |
 | `lint`       | Runs the linter to check for code quality issues.      |
 | `lint:fix`   | Runs the linter and automatically fixes issues.        |
 | `typecheck`  | Runs the TypeScript compiler to check for type errors. |
@@ -90,7 +99,23 @@ The following scripts are available in the `package.json`:
 | `format:fix` | Formats the code with Prettier.                        |
 | `check:all`  | Runs both the linter and formatter checks.             |
 | `fix:all`    | Runs both the linter and formatter to fix all issues.  |
-| `clean`      | Removes the `.next` build directory.                   |
+
+### Testing
+
+| Script             | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| `test`             | Runs unit tests in watch mode.                   |
+| `test:ui`          | Opens Vitest UI for interactive test debugging.  |
+| `test:watch`       | Runs unit tests in watch mode.                   |
+| `test:run`         | Runs unit tests once (for CI).                   |
+| `test:coverage`    | Runs unit tests with coverage report.            |
+| `test:e2e`         | Runs Playwright E2E tests.                       |
+| `test:e2e:ui`      | Opens Playwright UI for interactive E2E testing. |
+| `test:e2e:debug`   | Runs E2E tests in debug mode.                    |
+| `test:e2e:codegen` | Opens Playwright codegen tool.                   |
+| `test:e2e:report`  | Shows the last Playwright test report.           |
+
+For more details on testing, see [TESTING.md](./TESTING.md).
 
 ## Project Scope
 

@@ -62,13 +62,20 @@ async function fetchCatalogDetails(catalogId: string): Promise<CatalogDetailsDto
 }
 
 interface CatalogDetailsPageProps {
-  params: {
-    catalogId: string;
-  };
+  params:
+    | Promise<{
+        catalogId: string;
+      }>
+    | {
+        catalogId: string;
+      };
 }
 
 export default async function CatalogDetailsPage({ params }: CatalogDetailsPageProps) {
-  const catalog = await fetchCatalogDetails(params.catalogId);
+  const resolvedParams = await params;
+  const catalogId = resolvedParams.catalogId;
+
+  const catalog = await fetchCatalogDetails(catalogId);
 
   if (!catalog) {
     notFound();

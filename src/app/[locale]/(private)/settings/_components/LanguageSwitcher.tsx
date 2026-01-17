@@ -23,7 +23,12 @@ export function LanguageSwitcher({ currentValue, disabled = false, onSelect }: L
   );
 
   return (
-    <section aria-labelledby="language-preferences" className="space-y-4">
+    <section
+      aria-labelledby="language-preferences"
+      className="space-y-4"
+      data-testid="language-switcher"
+      data-current-language={currentValue}
+    >
       <div>
         <h3 id="language-preferences" className="text-sm font-medium leading-none">
           {translation("label")}
@@ -49,6 +54,7 @@ export function LanguageSwitcher({ currentValue, disabled = false, onSelect }: L
                   void result;
                 }
               }}
+              data-testid={`language-option-${option.value}`}
             >
               {option.label}
             </Button>

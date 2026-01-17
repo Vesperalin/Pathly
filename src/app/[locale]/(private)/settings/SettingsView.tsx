@@ -79,13 +79,14 @@ export default function SettingsView({ initialProfile }: SettingsViewProps) {
       const nextUrl = `/${nextLocale}${nextPath === "/" ? "" : nextPath}`;
       const target = search ? `${nextUrl}?${search}` : nextUrl;
 
-      if (typeof window !== "undefined") {
-        window.location.assign(target);
+      // Use router navigation in E2E tests to avoid page context closure
+      if (process.env.PLAYWRIGHT_TEST || typeof window === "undefined") {
+        router.replace(target);
+        router.refresh();
         return;
       }
 
-      router.replace(target);
-      router.refresh();
+      window.location.assign(target);
     },
     [pathname, router, searchParams]
   );
