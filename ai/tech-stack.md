@@ -17,6 +17,7 @@ This document describes the key technologies used in the Pathly project to ensur
 - **Authentication**: A built-in system for user management (registration, login) based on email and password.
 - **Auto-generated API**: Automatically provides an API for interacting with the database, which significantly speeds up the development of CRUD operations.
 
+<<<<<<< HEAD
 ## Testing
 
 ### Unit & Integration Tests
@@ -44,4 +45,9 @@ This document describes the key technologies used in the Pathly project to ensur
 ## CI/CD and Hosting (do skonfigurowania później)
 
 - **GitHub Actions**: A tool for continuous integration (CI). Will be used to automatically run tasks (tests, linting, type checking) with every pull request to ensure code quality.
+=======
+## CI/CD and Hosting
+
+- **GitHub Actions**: A tool for continuous integration (CI). Used to automatically run tasks (tests, linting, type checking) with every pull request to ensure code quality.
+>>>>>>> main
 - **Vercel**: A platform for hosting and continuous deployment (CD), optimized for Next.js. It provides automatic production deployments and preview environments for each pull request.

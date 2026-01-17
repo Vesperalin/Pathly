@@ -88,7 +88,7 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
           // Show create account prompt on any login error (improves UX and follows industry standard)
           setShowCreateAccountPrompt(true);
         }
-        
+
         // Reset loading state on error
         setIsLoading(false);
       }

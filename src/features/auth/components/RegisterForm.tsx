@@ -86,7 +86,7 @@ export function RegisterForm({ onSubmit = noop }: RegisterFormProps) {
           const errorMessage = t.has(translationKey) ? t(translationKey as "errors.generic") : t("errors.generic");
           setFormError(errorMessage);
         }
-        
+
         // Reset loading state on error
         setIsLoading(false);
       }
