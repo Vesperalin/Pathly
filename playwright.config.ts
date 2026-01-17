@@ -58,6 +58,7 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
+  globalTeardown: require.resolve("./e2e/global.teardown.ts"),
 
   // Automatycznie uruchamia dev server przed testami
   webServer: {
