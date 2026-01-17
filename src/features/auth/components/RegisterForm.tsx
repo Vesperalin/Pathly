@@ -9,6 +9,7 @@ import { createRegisterSchema, type RegisterFormValues } from "@/features/auth/v
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -16,6 +17,7 @@ interface ActionResult {
   success: boolean;
   error?: string;
   fieldErrors?: Record<string, string>;
+  redirectUrl?: string;
 }
 
 interface RegisterFormProps {
@@ -28,6 +30,7 @@ export function RegisterForm({ onSubmit = noop }: RegisterFormProps) {
   const t = useTranslations("auth.register");
   const validationMessages = useAuthValidationMessages();
   const scopedPath = useLocaleAwarePath();
+  const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,8 +60,15 @@ export function RegisterForm({ onSubmit = noop }: RegisterFormProps) {
       const result = await onSubmit(values);
 
       // Handle ActionResult from Server Action
-      // Note: successful registration will redirect, so this code only runs on error
-      if (!result.success) {
+      if (result.success) {
+        // Success - redirect to provided URL (usually dashboard)
+        if (result.redirectUrl) {
+          // Use Next.js router for navigation (better than window.location.href in tests)
+          router.push(result.redirectUrl);
+          // Keep loading state while redirecting
+          return;
+        }
+      } else {
         // Handle field-specific errors
         if (result.fieldErrors) {
           Object.entries(result.fieldErrors).forEach(([field, message]) => {
@@ -76,21 +86,15 @@ export function RegisterForm({ onSubmit = noop }: RegisterFormProps) {
           const errorMessage = t.has(translationKey) ? t(translationKey as "errors.generic") : t("errors.generic");
           setFormError(errorMessage);
         }
+        
+        // Reset loading state on error
+        setIsLoading(false);
       }
     } catch (error) {
-      // Next.js redirect() throws a special error - let it propagate
-      if (error && typeof error === "object" && "digest" in error) {
-        const digest = (error as { digest?: string }).digest;
-        if (digest?.startsWith("NEXT_REDIRECT")) {
-          throw error;
-        }
-      }
-
       // Handle unexpected errors (network, etc.)
       const fallbackMessage = t("errors.generic");
       const message = error instanceof Error && error.message ? error.message : fallbackMessage;
       setFormError(message);
-    } finally {
       setIsLoading(false);
     }
   });
@@ -98,7 +102,7 @@ export function RegisterForm({ onSubmit = noop }: RegisterFormProps) {
   const loading = isSubmitting || isLoading;
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+    <form className="space-y-6" onSubmit={handleSubmit} noValidate data-testid="register-form">
       <FormErrorMessage message={formError} />
 
       <div className="space-y-2">
@@ -113,6 +117,7 @@ export function RegisterForm({ onSubmit = noop }: RegisterFormProps) {
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "register-email-error" : undefined}
           {...form.register("email")}
+          data-testid="register-email"
         />
         <FieldError id="register-email-error" message={errors.email?.message} />
       </div>
@@ -128,6 +133,7 @@ export function RegisterForm({ onSubmit = noop }: RegisterFormProps) {
           aria-invalid={Boolean(errors.password)}
           aria-describedby={errors.password ? "register-password-error" : undefined}
           {...form.register("password")}
+          data-testid="register-password"
         />
         <FieldError id="register-password-error" message={errors.password?.message} />
         <p className="text-xs text-muted-foreground">{t("helper.passwordHint")}</p>
@@ -144,17 +150,22 @@ export function RegisterForm({ onSubmit = noop }: RegisterFormProps) {
           aria-invalid={Boolean(errors.confirmPassword)}
           aria-describedby={errors.confirmPassword ? "register-confirm-password-error" : undefined}
           {...form.register("confirmPassword")}
+          data-testid="register-confirm-password"
         />
         <FieldError id="register-confirm-password-error" message={errors.confirmPassword?.message} />
       </div>
 
-      <Button type="submit" disabled={loading} aria-busy={loading} className="w-full">
+      <Button type="submit" disabled={loading} aria-busy={loading} className="w-full" data-testid="register-submit">
         {loading ? t("form.actions.submitting") : t("form.actions.submit")}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
         {t("form.actions.switchPrefix")}{" "}
-        <Link href={scopedPath("/login")} className="font-medium text-primary hover:underline">
+        <Link
+          href={scopedPath("/login")}
+          className="font-medium text-primary hover:underline"
+          data-testid="register-switch-to-login"
+        >
           {t("form.actions.switchCta")}
         </Link>
       </p>

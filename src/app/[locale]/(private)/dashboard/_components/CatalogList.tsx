@@ -104,14 +104,14 @@ export function CatalogList({
   }
 
   return (
-    <Card>
+    <Card data-testid={isUserList ? "user-catalog-list" : "system-catalog-list"}>
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
         <div className="space-y-1.5">
           <CardTitle>{title}</CardTitle>
           {isRefreshing ? <p className="text-xs text-muted-foreground">{labels.refreshing}</p> : null}
         </div>
         {isUserList && onAdd && addActionLabel ? (
-          <Button onClick={onAdd} size="sm">
+          <Button onClick={onAdd} size="sm" data-testid="catalog-add-button">
             {addActionLabel}
           </Button>
         ) : null}
@@ -127,7 +127,7 @@ export function CatalogList({
             actionLabel={emptyState.actionLabel}
           />
         ) : (
-          <Table>
+          <Table data-testid="catalog-table">
             <TableHeader>
               <TableRow>
                 <TableHead>{labels.name}</TableHead>
@@ -144,9 +144,18 @@ export function CatalogList({
                 const relativeUpdatedAt = formatRelativeUpdatedAt(catalog.updated_at, locale);
 
                 return (
-                  <TableRow key={catalog.id}>
+                  <TableRow
+                    key={catalog.id}
+                    data-testid="catalog-row"
+                    data-catalog-id={catalog.id}
+                    data-catalog-predefined={catalog.is_predefined ? "true" : "false"}
+                  >
                     <TableCell>
-                      <Link href={href} className="font-medium text-primary underline-offset-4 hover:underline">
+                      <Link
+                        href={href}
+                        className="font-medium text-primary underline-offset-4 hover:underline"
+                        data-testid="catalog-row-link"
+                      >
                         {catalog.name}
                       </Link>
                     </TableCell>
@@ -158,13 +167,31 @@ export function CatalogList({
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label={labels.actionsLabel}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label={labels.actionsLabel}
+                              data-testid="catalog-row-actions"
+                              data-catalog-id={catalog.id}
+                            >
                               <MoreVertical className="h-4 w-4" aria-hidden="true" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onSelect={() => onEdit?.(catalog)}>{labels.edit}</DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => onDelete?.(catalog)}>{labels.delete}</DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={() => onEdit?.(catalog)}
+                              data-testid="catalog-row-edit"
+                              data-catalog-id={catalog.id}
+                            >
+                              {labels.edit}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={() => onDelete?.(catalog)}
+                              data-testid="catalog-row-delete"
+                              data-catalog-id={catalog.id}
+                            >
+                              {labels.delete}
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -189,13 +216,16 @@ interface EmptyStateProps {
 
 function EmptyState({ title, description, actionLabel, onAdd }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-start gap-4 rounded-lg border border-dashed border-border bg-muted/30 p-6">
+    <div
+      className="flex flex-col items-start gap-4 rounded-lg border border-dashed border-border bg-muted/30 p-6"
+      data-testid="catalog-empty-state"
+    >
       <div className="space-y-1">
         <h3 className="text-base font-semibold text-foreground">{title}</h3>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
       {actionLabel && onAdd ? (
-        <Button onClick={onAdd} size="sm">
+        <Button onClick={onAdd} size="sm" data-testid="catalog-empty-state-add">
           {actionLabel}
         </Button>
       ) : null}

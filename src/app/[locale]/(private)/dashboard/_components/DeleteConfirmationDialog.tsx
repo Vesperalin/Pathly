@@ -53,14 +53,16 @@ export function DeleteConfirmationDialog({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent data-testid="catalog-delete-dialog">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>{cancelLabel}</AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm} disabled={isLoading}>
+          <AlertDialogCancel disabled={isLoading} data-testid="catalog-delete-cancel">
+            {cancelLabel}
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={handleConfirm} disabled={isLoading} data-testid="catalog-delete-confirm">
             {isLoading ? `${confirmLabel}…` : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>

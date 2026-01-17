@@ -1,21 +1,26 @@
-import { expect } from "@playwright/test";
+import { expect, Locator } from "@playwright/test";
 import { BasePage } from "./base.page";
 
 /**
- * Page Object dla strony logowania
- * Przykład implementacji Page Object Model pattern
+ * Page Object dla strony logowania oparty o stabilne selektory data-testid.
+ * Używany w scenariuszach z @ai/e2e-test-cases.md (logowanie, egzekwowanie RLS).
  */
 export class LoginPage extends BasePage {
-  // Selektory
-  private readonly emailInput = this.page.getByLabel(/email/i);
-  private readonly passwordInput = this.page.getByLabel(/password|hasło/i);
-  private readonly submitButton = this.page.getByRole("button", {
-    name: /sign in|zaloguj/i,
-  });
-  private readonly errorMessage = this.page.getByText(/invalid|błąd/i);
+  readonly form = this.page.getByTestId("login-form");
+  readonly emailInput = this.page.getByTestId("login-email");
+  readonly passwordInput = this.page.getByTestId("login-password");
+  readonly submitButton = this.page.getByTestId("login-submit");
+  readonly createAccountPrompt = this.page.getByTestId("login-create-account-prompt");
+  readonly createAccountLink = this.page.getByTestId("login-create-account-link");
+  readonly switchToRegisterLink = this.page.getByTestId("login-switch-to-register");
 
-  async goto() {
-    await super.goto("/login");
+  private buildPath(locale?: string) {
+    return locale ? `/${locale}/login` : "/login";
+  }
+
+  async goto(locale?: string) {
+    await super.goto(this.buildPath(locale));
+    await this.form.waitFor({ state: "visible" });
   }
 
   async login(email: string, password: string) {
@@ -24,11 +29,27 @@ export class LoginPage extends BasePage {
     await this.submitButton.click();
   }
 
-  async expectError() {
-    await expect(this.errorMessage).toBeVisible();
+  async expectErrorMessage(message?: RegExp | string) {
+    await expect(this.form.getByText(message ?? /error|błąd/i)).toBeVisible();
   }
 
-  async expectSuccessfulLogin() {
-    await expect(this.page).toHaveURL(/.*dashboard/);
+  async expectCreateAccountPromptVisible() {
+    await expect(this.createAccountPrompt).toBeVisible();
+  }
+
+  async expectFormVisible() {
+    await expect(this.form).toBeVisible();
+  }
+
+  async expectSwitchToRegisterVisible() {
+    await expect(this.switchToRegisterLink).toBeVisible();
+  }
+
+  async expectRedirectToDashboard() {
+    await expect(this.page).toHaveURL(/\/dashboard/i);
+  }
+
+  get toast(): Locator {
+    return this.page.getByRole("status");
   }
 }

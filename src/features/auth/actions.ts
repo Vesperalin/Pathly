@@ -26,6 +26,7 @@ interface ActionResult {
   success: boolean;
   error?: string;
   fieldErrors?: Record<string, string>;
+  redirectUrl?: string;
 }
 
 /**
@@ -64,7 +65,7 @@ function mapAuthError(error: unknown): string {
 
 /**
  * Server Action for user login
- * Validates credentials, signs in with Supabase, and redirects to dashboard
+ * Validates credentials, signs in with Supabase, and returns success (client handles redirect)
  */
 export async function loginAction(locale: string, values: LoginFormValues): Promise<ActionResult> {
   // Server-side validation
@@ -115,21 +116,21 @@ export async function loginAction(locale: string, values: LoginFormValues): Prom
       };
     }
 
-    if (!data.user) {
+    if (!data.user || !data.session) {
       return {
         success: false,
         error: "generic",
       };
     }
 
-    // Success - redirect to dashboard with locale
-    redirect(`/${locale}/dashboard`);
+    // Return success with redirect URL - let client handle navigation
+    // This ensures cookies are properly set before redirect
+    return {
+      success: true,
+      redirectUrl: `/${locale}/dashboard`,
+    };
   } catch (error) {
-    // Handle redirect or unexpected errors
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
-      throw error;
-    }
-
+    console.error("Login error:", error);
     return {
       success: false,
       error: mapAuthError(error),
@@ -139,7 +140,7 @@ export async function loginAction(locale: string, values: LoginFormValues): Prom
 
 /**
  * Server Action for user registration
- * Creates new account, auto-logs in, and redirects to dashboard
+ * Creates new account, auto-logs in, and returns success (client handles redirect)
  */
 export async function registerAction(locale: string, values: RegisterFormValues): Promise<ActionResult> {
   // Server-side validation
@@ -219,17 +220,32 @@ export async function registerAction(locale: string, values: RegisterFormValues)
       };
     }
 
+    // Note: Session might be null if email confirmation is required
+    // In this case, we need to explicitly sign in to get a session
+    if (!data.session) {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: result.data.email,
+        password: result.data.password,
+      });
+
+      if (signInError || !signInData.session) {
+        return {
+          success: false,
+          error: "generic",
+        };
+      }
+    }
+
     // Note: Profile creation and default catalogs are handled by database trigger
     // (after insert on auth.users) as per spec
 
-    // Success - redirect to dashboard with locale
-    redirect(`/${locale}/dashboard`);
+    // Return success with redirect URL - let client handle navigation
+    // This ensures cookies are properly set before redirect
+    return {
+      success: true,
+      redirectUrl: `/${locale}/dashboard`,
+    };
   } catch (error) {
-    // Handle redirect or unexpected errors
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
-      throw error;
-    }
-
     return {
       success: false,
       error: mapAuthError(error),

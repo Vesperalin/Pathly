@@ -9,6 +9,7 @@ import { createLoginSchema, type LoginFormValues } from "@/features/auth/validat
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -16,6 +17,7 @@ interface ActionResult {
   success: boolean;
   error?: string;
   fieldErrors?: Record<string, string>;
+  redirectUrl?: string;
 }
 
 interface LoginFormProps {
@@ -28,6 +30,7 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
   const t = useTranslations("auth.login");
   const validationMessages = useAuthValidationMessages();
   const scopedPath = useLocaleAwarePath();
+  const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const [showCreateAccountPrompt, setShowCreateAccountPrompt] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -56,8 +59,15 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
       const result = await onSubmit(values);
 
       // Handle ActionResult from Server Action
-      // Note: successful login will redirect, so this code only runs on error
-      if (!result.success) {
+      if (result.success) {
+        // Success - redirect to provided URL (usually dashboard)
+        if (result.redirectUrl) {
+          // Use Next.js router for navigation (better than window.location.href in tests)
+          router.push(result.redirectUrl);
+          // Keep loading state while redirecting
+          return;
+        }
+      } else {
         // Handle field-specific errors
         if (result.fieldErrors) {
           Object.entries(result.fieldErrors).forEach(([field, message]) => {
@@ -78,21 +88,15 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
           // Show create account prompt on any login error (improves UX and follows industry standard)
           setShowCreateAccountPrompt(true);
         }
+        
+        // Reset loading state on error
+        setIsLoading(false);
       }
     } catch (error) {
-      // Next.js redirect() throws a special error - let it propagate
-      if (error && typeof error === "object" && "digest" in error) {
-        const digest = (error as { digest?: string }).digest;
-        if (digest?.startsWith("NEXT_REDIRECT")) {
-          throw error;
-        }
-      }
-
       // Handle unexpected errors (network, etc.)
       const fallbackMessage = t("errors.generic");
       const message = error instanceof Error && error.message ? error.message : fallbackMessage;
       setFormError(message);
-    } finally {
       setIsLoading(false);
     }
   });
@@ -100,14 +104,16 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
   const loading = isSubmitting || isLoading;
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+    <form className="space-y-6" onSubmit={handleSubmit} noValidate data-testid="login-form">
       <FormErrorMessage message={formError} />
 
       {showCreateAccountPrompt && (
-        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4" data-testid="login-create-account-prompt">
           <p className="mb-2 text-sm font-medium text-foreground">{t("helper.noAccountYet")}</p>
-          <Button asChild variant="outline" size="sm" className="w-full">
-            <Link href={scopedPath("/register")}>{t("helper.createAccountCta")}</Link>
+          <Button asChild variant="outline" size="sm" className="w-full" data-testid="login-create-account-button">
+            <Link href={scopedPath("/register")} data-testid="login-create-account-link">
+              {t("helper.createAccountCta")}
+            </Link>
           </Button>
         </div>
       )}
@@ -123,6 +129,7 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
           disabled={loading}
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "login-email-error" : undefined}
+          data-testid="login-email"
           {...form.register("email")}
         />
         <FieldError id="login-email-error" message={errors.email?.message} />
@@ -138,18 +145,23 @@ export function LoginForm({ onSubmit = noop }: LoginFormProps) {
           disabled={loading}
           aria-invalid={Boolean(errors.password)}
           aria-describedby={errors.password ? "login-password-error" : undefined}
+          data-testid="login-password"
           {...form.register("password")}
         />
         <FieldError id="login-password-error" message={errors.password?.message} />
       </div>
 
-      <Button type="submit" disabled={loading} aria-busy={loading} className="w-full">
+      <Button type="submit" disabled={loading} aria-busy={loading} className="w-full" data-testid="login-submit">
         {loading ? t("form.actions.submitting") : t("form.actions.submit")}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
         {t("form.actions.switchPrefix")}{" "}
-        <Link href={scopedPath("/register")} className="font-medium text-primary hover:underline">
+        <Link
+          href={scopedPath("/register")}
+          className="font-medium text-primary hover:underline"
+          data-testid="login-switch-to-register"
+        >
           {t("form.actions.switchCta")}
         </Link>
       </p>

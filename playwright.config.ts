@@ -1,4 +1,16 @@
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+import { existsSync } from "node:fs";
+import path from "node:path";
+
+const configDir = path.resolve(__dirname);
+const envPath = path.resolve(configDir, ".env.test");
+
+if (existsSync(envPath)) {
+  dotenv.config({ path: envPath, override: true });
+} else {
+  console.warn("Playwright could not locate .env.test in the project root.");
+}
 
 /**
  * Konfiguracja Playwright dla testów E2E
@@ -6,6 +18,7 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./e2e",
+  timeout: 3 * 60 * 1000,
 
   // Uruchamiaj testy sekwencyjnie na początku (łatwiej debugować)
   // Zmień na true gdy będziesz mieć dużo testów i będą stabilne
@@ -28,8 +41,8 @@ export default defineConfig({
     // Możesz pisać page.goto('/') zamiast pełnego URL
     baseURL: "http://localhost:3000",
 
-    // Zbieraj trace zawsze (będziesz mógł zobaczyć co się stało)
-    trace: "on",
+    // Zbieraj trace tylko przy pierwszym retry, żeby ograniczyć narzut
+    trace: "on-first-retry",
 
     // Screenshot przy błędach
     screenshot: "only-on-failure",
@@ -50,7 +63,7 @@ export default defineConfig({
   webServer: {
     command: "npm run dev",
     url: "http://localhost:3000",
-    reuseExistingServer: true, // Nie restartuj jeśli już jest uruchomiony
-    timeout: 120 * 1000, // 2 minuty na uruchomienie
+    reuseExistingServer: false,
+    timeout: 120 * 1000,
   },
 });

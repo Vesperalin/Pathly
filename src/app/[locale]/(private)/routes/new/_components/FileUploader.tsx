@@ -104,6 +104,7 @@ export function FileUploader({ isParsing, onFilesSelected, texts }: FileUploader
       onDrop={handleDrop}
       role="group"
       aria-disabled={isParsing}
+      data-testid="gpx-uploader"
     >
       <input
         ref={inputRef}
@@ -113,6 +114,7 @@ export function FileUploader({ isParsing, onFilesSelected, texts }: FileUploader
         onChange={handleInputChange}
         aria-hidden="true"
         tabIndex={-1}
+        data-testid="gpx-upload-input"
       />
       <div className="space-y-2">
         <p className="text-sm font-medium">{texts.description}</p>
@@ -125,6 +127,7 @@ export function FileUploader({ isParsing, onFilesSelected, texts }: FileUploader
         disabled={isParsing}
         aria-busy={isParsing}
         className="gap-2"
+        data-testid="gpx-upload-button"
       >
         {isParsing ? (
           <>
