@@ -92,28 +92,23 @@ export default function DashboardContent({
     void mutateUserCatalogs();
   }, [mutateUserCatalogs]);
 
-  const catalogFormSchema = useMemo(
-    () =>
-      z.object({
-        name: z
-          .string()
-          .min(3, translation("form.validation.name.minLength"))
-          .max(255, translation("form.validation.name.maxLength")),
-      }),
-    [translation]
-  );
+  const catalogFormSchema = useMemo(() => {
+    return z.object({
+      name: z
+        .string()
+        .min(3, translation("form.validation.name.minLength"))
+        .max(255, translation("form.validation.name.maxLength")),
+    });
+  }, [translation]);
 
-  const handleModalOpenChange = useCallback(
-    (nextIsOpen: boolean) => {
-      setIsFormOpen(nextIsOpen);
+  const handleModalOpenChange = useCallback((nextIsOpen: boolean) => {
+    setIsFormOpen(nextIsOpen);
 
-      if (!nextIsOpen) {
-        setEditingCatalog(null);
-        setFormMode("create");
-      }
-    },
-    []
-  );
+    if (!nextIsOpen) {
+      setEditingCatalog(null);
+      setFormMode("create");
+    }
+  }, []);
 
   const handleFormSubmit = useCallback(
     async (values: CreateCatalogCommand | UpdateCatalogCommand) => {
@@ -264,7 +259,7 @@ export default function DashboardContent({
         isOpen={isFormOpen}
         onOpenChange={handleModalOpenChange}
         onSubmit={handleFormSubmit}
-        initialData={formMode === "edit" ? editingCatalog ?? undefined : undefined}
+        initialData={formMode === "edit" ? (editingCatalog ?? undefined) : undefined}
         texts={{
           titleCreate: translation("form.create.title"),
           titleEdit: translation("form.edit.title"),

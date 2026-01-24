@@ -33,10 +33,7 @@ const createEmailSchema = (messages: EmailValidationMessages) =>
   z.string().trim().min(1, { message: messages.required }).email({ message: messages.invalid });
 
 const createPasswordSchema = (messages: PasswordValidationMessages) =>
-  z
-    .string()
-    .min(1, { message: messages.required })
-    .min(8, { message: messages.minLength });
+  z.string().min(1, { message: messages.required }).min(8, { message: messages.minLength });
 
 const createConfirmPasswordSchema = (messages: ConfirmPasswordValidationMessages) =>
   z.string().min(1, { message: messages.required });
