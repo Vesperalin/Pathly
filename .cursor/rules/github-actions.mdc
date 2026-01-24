@@ -1,0 +1,18 @@
+---
+alwaysApply: false
+---
+
+## Github Action Rules
+
+### Version Verification
+
+1. Identify public actions used within the workflow
+2. For each action always check what is the most up-to-date version with the following command:
+
+```bash
+curl -s https://api.github.com/repos/{owner}/{repo}/releases/latest | grep '"tag_name":' | sed -E 's/.*"v([0-9]+).*/\1/'
+```
+
+### Setup Node
+
+Always check the version of `.nvmrc` in the project to make sure Node is correct (hardcoded LTS or version from file - if it exists).
