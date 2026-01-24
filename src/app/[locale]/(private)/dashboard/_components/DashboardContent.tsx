@@ -92,14 +92,16 @@ export default function DashboardContent({
     void mutateUserCatalogs();
   }, [mutateUserCatalogs]);
 
-  const catalogFormSchema = useMemo(() => {
-    return z.object({
-      name: z
-        .string()
-        .min(3, translation("form.validation.name.minLength"))
-        .max(255, translation("form.validation.name.maxLength")),
-    });
-  }, [translation]);
+  const catalogFormSchema = useMemo(
+    () =>
+      z.object({
+        name: z
+          .string()
+          .min(3, translation("form.validation.name.minLength"))
+          .max(255, translation("form.validation.name.maxLength")),
+      }),
+    [translation]
+  );
 
   const handleModalOpenChange = useCallback((nextIsOpen: boolean) => {
     setIsFormOpen(nextIsOpen);

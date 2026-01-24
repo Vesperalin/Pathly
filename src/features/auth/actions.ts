@@ -123,12 +123,11 @@ export async function loginAction(locale: string, values: LoginFormValues): Prom
       };
     }
 
-    const dashboardUrl = `/${locale}/dashboard`;
-    // Ensure user ends up in their locale-specific dashboard after login
-    redirect(dashboardUrl);
+    // Return success with redirect URL - let client handle navigation
+    // This ensures cookies are properly set before redirect
     return {
       success: true,
-      redirectUrl: dashboardUrl,
+      redirectUrl: `/${locale}/dashboard`,
     };
   } catch (error) {
     console.error("Login error:", error);
@@ -240,11 +239,11 @@ export async function registerAction(locale: string, values: RegisterFormValues)
     // Note: Profile creation and default catalogs are handled by database trigger
     // (after insert on auth.users) as per spec
 
-    const dashboardUrl = `/${locale}/dashboard`;
-    redirect(dashboardUrl);
+    // Return success with redirect URL - let client handle navigation
+    // This ensures cookies are properly set before redirect
     return {
       success: true,
-      redirectUrl: dashboardUrl,
+      redirectUrl: `/${locale}/dashboard`,
     };
   } catch (error) {
     return {

@@ -25,21 +25,8 @@ interface AuthStubOptions {
 }
 
 function createAuthStub(options: AuthStubOptions = {}) {
-  const defaultSession = {
-    access_token: "token",
-    refresh_token: "refresh",
-    expires_in: 3600,
-    token_type: "bearer",
-    provider_token: null,
-    provider_refresh_token: null,
-    user: { id: "user-1", email: "user@example.com" },
-  };
-
   const defaultSuccess = {
-    data: {
-      user: { id: "user-1", email: "user@example.com" },
-      session: defaultSession,
-    },
+    data: { user: { id: "user-1", email: "user@example.com" } },
     error: null,
   } as const;
 
