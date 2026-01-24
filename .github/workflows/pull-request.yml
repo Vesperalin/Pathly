@@ -92,6 +92,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate .env.test from secrets
+        run: |
+          cat <<'EOF' > .env.test
+          NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+          SUPABASE_ACCESS_TOKEN=${SUPABASE_ACCESS_TOKEN}
+          E2E_USERNAME_ID=${E2E_USERNAME_ID}
+          E2E_USERNAME=${E2E_USERNAME}
+          E2E_PASSWORD=${E2E_PASSWORD}
+          EOF
+
       - name: Install Playwright browsers
         run: npx playwright install chromium
 
