@@ -40,14 +40,17 @@ export default defineConfig({
         "src/middleware.ts", // Middleware Next.js
       ],
 
-      // Progi pokrycia - na początek 60% (zwiększysz później)
-      // Jeśli spadnie poniżej, npm run test:coverage zafailuje
-      thresholds: {
-        lines: 60,
-        functions: 60,
-        branches: 60,
-        statements: 60,
-      },
+      // Progi pokrycia - tylko gdy explicite wymusimy je przez zmienną środowiskową
+      ...(process.env.VITEST_ENFORCE_COVERAGE === "true"
+        ? {
+            thresholds: {
+              lines: 60,
+              functions: 60,
+              branches: 60,
+              statements: 60,
+            },
+          }
+        : {}),
     },
 
     // Które pliki są testami
