@@ -32,6 +32,7 @@ function matchesPrefix(email: string, prefix: string) {
   return normalizedEmail.startsWith(prefixWithPlus) || normalizedEmail.startsWith(normalizedPrefix);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AdminSupabaseClient = SupabaseClient<any, string, string, any, any>;
 
 async function purgeUsers(client: AdminSupabaseClient, prefix: string) {
@@ -73,7 +74,7 @@ async function purgeUsers(client: AdminSupabaseClient, prefix: string) {
 export default async function globalTeardown() {
   const config = resolveCleanupConfig();
   if (!config) {
-    console.info("Playwright teardown: brak wymaganych zmiennych środowiskowych Supabase. Czyszczenie pominięte.");
+    console.warn("Playwright teardown: brak wymaganych zmiennych środowiskowych Supabase. Czyszczenie pominięte.");
     return;
   }
 
