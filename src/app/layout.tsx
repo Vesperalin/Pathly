@@ -5,13 +5,14 @@ import type { ReactNode } from "react";
 
 interface RootLayoutProps {
   children: ReactNode;
-  params: {
+  params: Promise<{
     locale?: string;
-  };
+  }>;
 }
 
-export default function RootLayout({ children, params }: RootLayoutProps) {
-  const locale = isSupportedLocale(params.locale) ? params.locale : FALLBACK_LOCALE;
+export default async function RootLayout({ children, params }: RootLayoutProps) {
+  const { locale: localeParam } = await params;
+  const locale = isSupportedLocale(localeParam) ? localeParam : FALLBACK_LOCALE;
 
   return (
     <html lang={locale} suppressHydrationWarning>

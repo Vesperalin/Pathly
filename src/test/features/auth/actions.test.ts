@@ -3,11 +3,6 @@ import type { LoginFormValues, RegisterFormValues } from "@/features/auth/valida
 import { AuthError } from "@supabase/supabase-js";
 import { vi } from "vitest";
 
-const redirectMock = vi.fn();
-vi.mock("next/navigation", () => ({
-  redirect: (...args: unknown[]) => redirectMock(...args),
-}));
-
 const createClientMock = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({
   createClient: (...args: unknown[]) => createClientMock(...args),
@@ -15,18 +10,29 @@ vi.mock("@/lib/supabase/server", () => ({
 
 interface AuthStubOptions {
   signInResult?: {
-    data: { user: { id: string; email: string } | null };
+    data: { user: { id: string; email: string } | null; session?: unknown };
     error: AuthError | null;
   };
   signUpResult?: {
-    data: { user: { id: string; email: string } | null };
+    data: { user: { id: string; email: string } | null; session?: unknown };
     error: AuthError | null;
   };
 }
 
 function createAuthStub(options: AuthStubOptions = {}) {
+  const defaultSession = {
+    access_token: "token",
+    refresh_token: "refresh",
+    expires_in: 3600,
+    token_type: "bearer",
+    user: { id: "user-1", email: "user@example.com" },
+  };
+
   const defaultSuccess = {
-    data: { user: { id: "user-1", email: "user@example.com" } },
+    data: {
+      user: { id: "user-1", email: "user@example.com" },
+      session: defaultSession,
+    },
     error: null,
   } as const;
 
@@ -44,7 +50,7 @@ describe("auth actions", () => {
   });
 
   describe("registration and login flow", () => {
-    it("redirects to dashboard after successful login", async () => {
+    it("returns success with redirect URL after successful login", async () => {
       const clientStub = createAuthStub();
       createClientMock.mockResolvedValueOnce(clientStub);
       const payload: LoginFormValues = {
@@ -52,13 +58,16 @@ describe("auth actions", () => {
         password: "StrongPass1",
       };
 
-      await loginAction("pl", payload);
+      const result = await loginAction("pl", payload);
 
       expect(clientStub.auth.signInWithPassword).toHaveBeenCalledWith({
         email: payload.email,
         password: payload.password,
       });
-      expect(redirectMock).toHaveBeenCalledWith("/pl/dashboard");
+      expect(result).toEqual({
+        success: true,
+        redirectUrl: "/pl/dashboard",
+      });
     });
 
     it("returns invalidCredentials error for wrong password", async () => {
@@ -81,7 +90,6 @@ describe("auth actions", () => {
         success: false,
         error: "invalidCredentials",
       });
-      expect(redirectMock).not.toHaveBeenCalled();
     });
 
     it("returns emailNotConfirmed error when Supabase reports unverified email", async () => {
@@ -104,13 +112,21 @@ describe("auth actions", () => {
         success: false,
         error: "emailNotConfirmed",
       });
-      expect(redirectMock).not.toHaveBeenCalled();
     });
 
-    it("redirects after successful registration", async () => {
+    it("returns success with redirect URL after successful registration", async () => {
       const clientStub = createAuthStub({
         signUpResult: {
-          data: { user: { id: "user-2", email: "new@example.com" } },
+          data: {
+            user: { id: "user-2", email: "new@example.com" },
+            session: {
+              access_token: "token",
+              refresh_token: "refresh",
+              expires_in: 3600,
+              token_type: "bearer",
+              user: { id: "user-2", email: "new@example.com" },
+            },
+          },
           error: null,
         },
       });
@@ -121,14 +137,17 @@ describe("auth actions", () => {
         confirmPassword: "StrongPass1",
       };
 
-      await registerAction("en", payload);
+      const result = await registerAction("en", payload);
 
       expect(clientStub.auth.signUp).toHaveBeenCalledWith({
         email: payload.email,
         password: payload.password,
         options: { emailRedirectTo: undefined },
       });
-      expect(redirectMock).toHaveBeenCalledWith("/en/dashboard");
+      expect(result).toEqual({
+        success: true,
+        redirectUrl: "/en/dashboard",
+      });
     });
 
     it("returns emailTaken when Supabase reports duplicate email", async () => {
@@ -151,7 +170,6 @@ describe("auth actions", () => {
         success: false,
         error: "emailTaken",
       });
-      expect(redirectMock).not.toHaveBeenCalled();
     });
   });
 });
