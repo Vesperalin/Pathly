@@ -15,14 +15,7 @@ import { useTranslations } from "next-intl";
 export function DashboardBreadcrumbs() {
   const t = useTranslations("dashboard.breadcrumbs");
 
-  return (
-    <BreadcrumbsSetter
-      items={[
-        { label: t("home"), href: "/dashboard" },
-        { label: t("overview") },
-      ]}
-    />
-  );
+  return <BreadcrumbsSetter items={[{ label: t("home"), href: "/dashboard" }, { label: t("overview") }]} />;
 }
 ```
 
@@ -40,10 +33,7 @@ useEffect(() => {
     return;
   }
 
-  setBreadcrumbs([
-    { label: t("routes"), href: "/routes" },
-    { label: route.name },
-  ]);
+  setBreadcrumbs([{ label: t("routes"), href: "/routes" }, { label: route.name }]);
 }, [route, setBreadcrumbs, t]);
 ```
 
@@ -60,5 +50,3 @@ Always source breadcrumb labels from your route’s message bundle so the copy m
 ## 4. Desktop rendering
 
 Breadcrumbs currently render only inside the mobile header. We can easily reuse the same `Breadcrumbs` component in future desktop surfaces (e.g. page headers) without altering individual views—just mount the component where desired.
-
-

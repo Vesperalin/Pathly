@@ -12,6 +12,7 @@ This endpoint updates the details of an existing route identified by `routeId`. 
   - **Path (Required)**:
     - `routeId` (UUID): The unique identifier of the route to be updated.
 - **Request Body**: `UpdateRouteCommand`
+
   ```json
   {
     "name": "string",
